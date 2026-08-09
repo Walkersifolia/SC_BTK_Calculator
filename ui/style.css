@@ -324,9 +324,16 @@ html, body {
 }
 
 /* ── 部位预览 ── */
+.body-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .body-svg {
-  width: 100%;
+  width: 132px;
   height: auto;
+  flex-shrink: 0;
   background: var(--res-bg);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
@@ -344,10 +351,11 @@ html, body {
 .body-part:hover { filter: brightness(0.92); }
 
 .part-stats {
+  flex: 1;
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 4px 16px;
-  margin-top: 10px;
+  gap: 4px 14px;
   font-size: 12px;
   color: var(--text-secondary);
 }
@@ -355,8 +363,20 @@ html, body {
 .part-stats .stat {
   display: flex;
   justify-content: space-between;
-  padding: 3px 6px;
-  border-radius: 4px;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.part-stats .stat span:first-child { flex-shrink: 0; }
+.part-stats .stat span:last-child {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 .part-stats .stat.hl { background: var(--hover-row); color: var(--text); }

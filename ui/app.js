@@ -326,7 +326,6 @@ function renderPreview(d) {
     const div = document.createElement("div");
     div.className = "stat" + (pp.key === target.part ? " hl" : "");
     const rr = pp.r;
-    div.innerHTML = `<span>${pp.part} x${target.part === pp.key ? "<b>" : ""}${rr.dmg.toFixed(1)}${target.part === pp.key ? "</b>" : ""}</span>`;
     div.innerHTML = `<span>${pp.part}</span><span><b>${rr.dmg.toFixed(1)}</b> / BTK ${fmtBtk(rr.btk)}</span>`;
     stats.appendChild(div);
   }
@@ -360,8 +359,8 @@ function bindEvents() {
   });
 
   // 选择器
-  $("catSelect").addEventListener("change", onCatChange);
-  $("weaponSelect").addEventListener("change", onWeaponChange);
+  $("catSelect").addEventListener("change", () => onCatChange());
+  $("weaponSelect").addEventListener("change", () => onWeaponChange());
   $("cmpLCat").addEventListener("change", () => onCatChange("cmpL"));
   $("cmpLWeapon").addEventListener("change", () => onWeaponChange("cmpL"));
   $("cmpRCat").addEventListener("change", () => onCatChange("cmpR"));

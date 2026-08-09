@@ -18,7 +18,7 @@ DAMAGE_TYPES = ["DamagePhysical", "DamageEnergy", "DamageDistortion",
                 "DamageThermal", "DamageBiochemical", "DamageStun"]
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_RECORDS = os.path.join(_HERE, "..", "game_data", "full_extract", "libs", "foundry", "records")
+DEFAULT_RECORDS = os.path.join(_HERE, "game_data", "full_extract", "libs", "foundry", "records")
 OUT = os.path.join(_HERE, "btk_data.py")
 
 # 策展武器表: 文件名(去掉.json) -> 中文名（以官方简中 global.ini 为准，2026-08-08 版）

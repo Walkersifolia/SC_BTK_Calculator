@@ -46,12 +46,12 @@ python generate_data.py
 ## 项目结构
 
 ```
-BTK_Calculator/
 ├── btk_calculator.py      # 主程序（tkinter GUI）
 ├── btk_data.py            # 生成的数据模块（勿手改）
 ├── generate_data.py       # 数据生成脚本（读解包记录）
 ├── SC_BTK_Calculator.spec # PyInstaller 打包配置
-└── game_data/             # StarBreaker 解包数据快照
+├── requirements.txt       # 依赖说明（零第三方依赖）
+└── game_data/             # StarBreaker 解包数据快照（不入库，可重新生成）
 ```
 
 ## 数据来源与版本

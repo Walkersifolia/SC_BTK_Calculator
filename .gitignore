@@ -8,6 +8,8 @@ venv/
 # PyInstaller 构建产物
 build/
 dist/
+# 根目录启动 exe（发布产物，由 dist 复制而来，不入库）
+/SC_BTK_Calculator.exe
 
 # 解包数据快照（体积大，可重新生成；如要提交请保留）
 game_data/Data/

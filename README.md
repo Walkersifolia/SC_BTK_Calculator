@@ -16,6 +16,12 @@ Star Citizen FPS 武器 BTK（Bullets To Kill，击杀所需子弹数）/ TTK / 
 
 ## 安装与运行
 
+### 方式一：直接运行 exe（推荐）
+
+双击项目根目录的 `SC_BTK_Calculator.exe`（单文件，已内置 WebView2 依赖与 SC LOGO 图标）。
+
+### 方式二：源码运行
+
 需要 Python 3.10+，以及 Windows 10/11（自带 WebView2 Runtime）。
 
 ```powershell
@@ -25,9 +31,18 @@ python main.py
 
 > 旧版 tkinter 界面保留在 `btk_calculator.py`，计算逻辑已抽取为 `btk_core.py` 供新旧界面共用。
 
+## 重新打包 exe
+
+```powershell
+pip install pyinstaller
+python -m PyInstaller SC_BTK_Calculator.spec --noconfirm
+copy dist\SC_BTK_Calculator.exe .   # 复制到项目根目录
+```
+
 ## 架构
 
 ```
+SC_BTK_Calculator.exe # 根目录启动 exe（单文件，双击即用）
 main.py           # 入口：启动后端 + pywebview 打开 WebView2 窗口
 backend.py        # 本地 HTTP 服务（/api/* 计算接口 + ui/ 静态文件）
 btk_core.py       # 纯计算层（数据 + BTK/TTK/DPS 算法，无 UI）
@@ -36,13 +51,7 @@ ui/
   index.html      # 前端页面（圆角卡片布局）
   style.css       # 浅/深双主题样式（CSS 变量）
   app.js          # 前端交互（fetch 调用后端 API）
-```
-
-## 打包为单文件 exe（可选）
-
-```powershell
-pip install pyinstaller
-pyinstaller SC_BTK_Calculator.spec
+assets/icons/     # 应用图标（exe 打包用）
 ```
 
 ## 数据更新
@@ -62,12 +71,18 @@ python generate_data.py
 ## 项目结构
 
 ```
-├── btk_calculator.py      # 主程序（tkinter GUI）
-├── btk_data.py            # 生成的数据模块（勿手改）
-├── generate_data.py       # 数据生成脚本（读解包记录）
+├── SC_BTK_Calculator.exe # 启动 exe（单文件，双击运行）
+├── main.py               # 入口（WebView2 UI）
+├── backend.py            # 本地 HTTP 服务
+├── btk_core.py           # 纯计算层
+├── btk_data.py           # 数据模块（勿手改）
+├── generate_data.py      # 数据生成脚本
+├── btk_calculator.py     # 旧版 tkinter 界面（备用）
+├── ui/                   # Web 前端（HTML/CSS/JS）
+├── assets/icons/         # 应用图标
 ├── SC_BTK_Calculator.spec # PyInstaller 打包配置
-├── requirements.txt       # 依赖说明（零第三方依赖）
-└── game_data/             # StarBreaker 解包数据快照（不入库，可重新生成）
+├── requirements.txt      # 依赖（pywebview）
+└── game_data/            # StarBreaker 解包数据快照（不入库）
 ```
 
 ## 数据来源与版本

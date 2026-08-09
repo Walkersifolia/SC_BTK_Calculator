@@ -1,16 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
-
+# PyInstaller 配置：WebView2 UI 版（入口 main.py）
+# 打包产物：SC_BTK_Calculator.exe（放项目根目录，依赖在 _internal/）
 
 a = Analysis(
-    ['btk_calculator.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('app_icon_black.ico', '.'), ('app_icon_white.ico', '.')],
-    hiddenimports=[],
+    datas=[
+        ('ui', 'ui'),
+        ('assets/icons', 'assets/icons'),
+    ],
+    hiddenimports=[
+        'webview.platforms.edgechromium',
+        'backend',
+        'btk_core',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['tkinter'],
     noarchive=False,
     optimize=0,
 )
@@ -35,5 +43,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='app_icon_black.ico',
+    icon='assets/icons/app_icon_black.ico',
 )

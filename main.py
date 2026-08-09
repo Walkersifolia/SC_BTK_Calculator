@@ -29,9 +29,7 @@ def main():
             pass
         return
 
-    # 窗口图标（与 exe 图标一致）
-    icon = backend_icon()
-
+    # 窗口图标：exe 文件图标已由 PyInstaller 嵌入，任务栏自动使用；无需再传 icon 参数
     webview.create_window(
         "星际公民 BTK 计算器",
         url,
@@ -39,15 +37,8 @@ def main():
         height=880,
         min_size=(1120, 740),
         background_color="#f0f0f5",
-        icon=icon,
     )
     webview.start()
-
-
-def backend_icon():
-    import os
-    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app_icon_black.ico")
-    return p if os.path.exists(p) else None
 
 
 if __name__ == "__main__":

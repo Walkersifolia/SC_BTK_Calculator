@@ -1,0 +1,403 @@
+/* ============================================================
+   BTK 计算器 — 简洁圆角风格（参考 VRCA.Toolbox.App 的 WebView2 风格）
+   浅色/深色双主题：通过 body[data-theme] 切换 CSS 变量
+   ============================================================ */
+
+:root {
+  /* 浅色主题 */
+  --bg: #f0f0f5;
+  --surface: #ffffff;
+  --surface-alt: #f7f7fa;
+  --text: #1a1a2e;
+  --text-secondary: #5a6478;
+  --accent: #d97706;
+  --accent-hover: #f59e0b;
+  --accent-text: #ffffff;
+  --border: rgba(26, 26, 46, 0.12);
+  --divider: rgba(90, 100, 120, 0.18);
+  --danger: #dc2626;
+  --success: #16a34a;
+  --input-bg: #ffffff;
+  --hover-row: rgba(217, 119, 6, 0.08);
+  --shadow: 0 2px 12px rgba(26, 26, 46, 0.06);
+  --shadow-hover: 0 4px 20px rgba(26, 26, 46, 0.1);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --body-hit: #fca5a5;
+  --body-normal: #fde68a;
+  --body-outline: #475569;
+  --body-dim: #334155;
+  --res-bg: #f8fafc;
+}
+
+body[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --surface-alt: #1f2a44;
+  --text: #f2f2f7;
+  --text-secondary: #9aa3b5;
+  --accent: #f59e0b;
+  --accent-hover: #fbbf24;
+  --accent-text: #1a1a2e;
+  --border: rgba(255, 255, 255, 0.1);
+  --divider: rgba(255, 255, 255, 0.08);
+  --danger: #f87171;
+  --success: #4ade80;
+  --input-bg: #1f2a44;
+  --hover-row: rgba(245, 158, 11, 0.12);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --body-hit: #f87171;
+  --body-normal: #b45309;
+  --body-outline: #4a5261;
+  --body-dim: #c3c9d4;
+  --res-bg: #1a1d24;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: "Microsoft YaHei UI", "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.2s ease, color 0.2s ease;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ── 顶栏 ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--divider);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.brand-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modes {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.mode-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-btn:hover { background: var(--hover-row); color: var(--text); }
+.mode-btn.active { background: var(--accent); color: var(--accent-text); font-weight: 600; }
+
+.icon-btn {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── 主区 ── */
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 14px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* ── 圆角卡片 ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s ease, background 0.2s ease;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.card-title .hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+/* ── 表单字段 ── */
+.field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.field:last-child { margin-bottom: 0; }
+
+.field label {
+  width: 76px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.field input[type="number"] {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.field input[type="number"]:focus { border-color: var(--accent); }
+
+/* ── 自定义下拉菜单（关键：与参考项目一致）── */
+.select-wrap { flex: 1; position: relative; }
+
+.select-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 32px;
+  padding: 0 30px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.select-wrap select:hover { border-color: var(--accent); }
+.select-wrap select:focus { border-color: var(--accent); }
+
+.select-wrap::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--text-secondary);
+  border-bottom: 1.5px solid var(--text-secondary);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+  transition: transform 0.15s ease;
+}
+
+/* 下拉展开的选项列表 — 由原生渲染，但通过 select 的 color-scheme 保证深色正确 */
+.select-wrap select { color-scheme: light dark; }
+
+/* 复选框 */
+.chk-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  width: auto;
+}
+
+.chk-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ── 滑块 ── */
+.boost-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.boost-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.boost-label {
+  width: 44px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ── 徽标 / 警告 / 信息 ── */
+.badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+.warn {
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+.info-text {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* ── 对比网格 ── */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── 部位预览 ── */
+.body-svg {
+  width: 100%;
+  height: auto;
+  background: var(--res-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.body-part {
+  fill: var(--body-normal);
+  stroke: var(--body-outline);
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: fill 0.15s ease;
+}
+
+.body-part.active { fill: var(--body-hit); }
+.body-part:hover { filter: brightness(0.92); }
+
+.part-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 16px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.part-stats .stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+.part-stats .stat.hl { background: var(--hover-row); color: var(--text); }
+.part-stats .stat b { color: var(--text); font-weight: 600; }
+.part-stats .stat .dmg { color: var(--accent); }
+
+/* ── 结果区 ── */
+.result-card { flex: 1; display: flex; flex-direction: column; }
+
+.result-text {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--res-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text);
+  min-height: 120px;
+}
+
+.result-text .big {
+  font-family: "Microsoft YaHei UI", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.result-text .title {
+  font-family: "Microsoft YaHei UI", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.result-text .muted { color: var(--text-secondary); font-size: 12px; }
+
+/* ── 滚动条 ── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+::-webkit-scrollbar-track { background: transparent; }

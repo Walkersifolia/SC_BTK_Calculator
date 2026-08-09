@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星际公民 BTK 计算器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-name">星际公民 BTK 计算器</span>
+    </div>
+    <nav class="modes">
+      <button class="mode-btn active" data-mode="single">单武器</button>
+      <button class="mode-btn" data-mode="compare">武器对比</button>
+    </nav>
+    <button id="themeToggle" class="icon-btn" title="切换主题" aria-label="切换主题"></button>
+  </header>
+
+  <!-- 主区 -->
+  <main class="content">
+    <!-- 左侧：武器选择 -->
+    <section class="panel" id="panelLeft">
+      <!-- 单武器模式 -->
+      <div id="singlePanel">
+        <div class="card">
+          <div class="card-title">武器选择</div>
+          <div class="field">
+            <label>分类</label>
+            <div class="select-wrap">
+              <select id="catSelect"></select>
+            </div>
+          </div>
+          <div class="field">
+            <label>武器</label>
+            <div class="select-wrap">
+              <select id="weaponSelect"></select>
+            </div>
+          </div>
+          <div class="field">
+            <label class="chk-row">
+              <input type="checkbox" id="chargedChk">
+              <span>满蓄力</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 自定义武器 -->
+        <div class="card" id="customWeaponCard" hidden>
+          <div class="card-title">自定义武器属性</div>
+          <div class="field"><label>伤害/发</label><input type="number" id="cwDamage" value="30" min="0" step="0.5"></div>
+          <div class="field"><label>射速 RPM</label><input type="number" id="cwRpm" value="600" min="0"></div>
+          <div class="field"><label>弹丸数</label><input type="number" id="cwPellet" value="1" min="1"></div>
+          <div class="field">
+            <label>伤害类型</label>
+            <div class="select-wrap"><select id="cwType"><option>物理</option><option>能量</option></select></div>
+          </div>
+        </div>
+
+        <!-- 可编辑参数 -->
+        <div class="card">
+          <div class="card-title">武器参数<span class="hint">可直接修改</span></div>
+          <div class="field"><label>伤害 Alpha</label><input type="number" id="editAlpha" step="0.1"></div>
+          <div class="field"><label>射速 RPM</label><input type="number" id="editRpm" step="1"></div>
+          <div id="customBadge" class="badge" hidden>◆ 已按自定义参数计算</div>
+        </div>
+
+        <!-- 武器信息 -->
+        <div class="card">
+          <div class="card-title">武器信息</div>
+          <div id="weaponInfo" class="info-text"></div>
+        </div>
+        <div id="warnText" class="warn" hidden></div>
+      </div>
+
+      <!-- 对比模式 -->
+      <div id="comparePanel" hidden>
+        <div class="compare-grid">
+          <div class="card">
+            <div class="card-title">左侧</div>
+            <div class="field"><label>分类</label><div class="select-wrap"><select id="cmpLCat"></select></div></div>
+            <div class="field"><label>武器</label><div class="select-wrap"><select id="cmpLWeapon"></select></div></div>
+            <div class="field"><label class="chk-row"><input type="checkbox" id="cmpLCharged"><span>满蓄力</span></label></div>
+            <div class="field"><label>伤害</label><input type="number" id="cmpLAlpha" step="0.1"></div>
+            <div class="field"><label>射速</label><input type="number" id="cmpLRpm" step="1"></div>
+            <div id="cmpLInfo" class="info-text"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">右侧</div>
+            <div class="field"><label>分类</label><div class="select-wrap"><select id="cmpRCat"></select></div></div>
+            <div class="field"><label>武器</label><div class="select-wrap"><select id="cmpRWeapon"></select></div></div>
+            <div class="field"><label class="chk-row"><input type="checkbox" id="cmpRCharged"><span>满蓄力</span></label></div>
+            <div class="field"><label>伤害</label><input type="number" id="cmpRAlpha" step="0.1"></div>
+            <div class="field"><label>射速</label><input type="number" id="cmpRRpm" step="1"></div>
+            <div id="cmpRInfo" class="info-text"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右侧：目标 / 结果 -->
+    <section class="panel" id="panelRight">
+      <div class="card">
+        <div class="card-title">目标 / 命中 / 增益</div>
+        <div class="field"><label>目标类型</label><div class="select-wrap"><select id="targetSelect"></select></div></div>
+        <div class="field"><label>护甲类型</label><div class="select-wrap"><select id="armorSelect"></select></div></div>
+        <div class="field"><label>命中部位</label><div class="select-wrap"><select id="partSelect"></select></div></div>
+        <div class="field">
+          <label>伤害增益</label>
+          <div class="boost-row">
+            <input type="range" id="boostRange" min="-100" max="100" value="0" step="1">
+            <span id="boostLabel" class="boost-label">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自定义目标 -->
+      <div class="card" id="customTargetCard" hidden>
+        <div class="card-title">自定义目标</div>
+        <div class="field"><label>生命值</label><input type="number" id="ctHealth" value="100" min="1"></div>
+        <div class="field"><label>头部倍率</label><input type="number" id="ctHead" value="1.5" step="0.05"></div>
+        <div class="field"><label>躯干倍率</label><input type="number" id="ctTorso" value="1.0" step="0.05"></div>
+        <div class="field"><label>手臂倍率</label><input type="number" id="ctArms" value="0.8" step="0.05"></div>
+        <div class="field"><label>腿部倍率</label><input type="number" id="ctLegs" value="0.8" step="0.05"></div>
+      </div>
+
+      <!-- 部位预览 -->
+      <div class="card">
+        <div class="card-title">目标部位减伤预览</div>
+        <svg id="bodyPreview" viewBox="0 0 300 240" class="body-svg">
+          <rect id="bpHead" x="100" y="10" width="60" height="40" rx="10" class="body-part" data-part="head"/>
+          <rect id="bpTorso" x="110" y="60" width="40" height="60" rx="8" class="body-part" data-part="torso"/>
+          <rect id="bpArmsL" x="92" y="62" width="16" height="56" rx="8" class="body-part" data-part="arms"/>
+          <rect id="bpArmsR" x="152" y="62" width="16" height="56" rx="8" class="body-part" data-part="arms"/>
+          <rect id="bpLegsL" x="104" y="126" width="20" height="70" rx="8" class="body-part" data-part="legs"/>
+          <rect id="bpLegsR" x="136" y="126" width="20" height="70" rx="8" class="body-part" data-part="legs"/>
+        </svg>
+        <div id="partStats" class="part-stats"></div>
+      </div>
+
+      <!-- 结果 -->
+      <div class="card result-card">
+        <div class="card-title">计算结果</div>
+        <div id="resultText" class="result-text"></div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

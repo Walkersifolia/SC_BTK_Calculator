@@ -8,21 +8,37 @@ Star Citizen FPS 武器 BTK（Bullets To Kill，击杀所需子弹数）/ TTK / 
 - 48 把 FPS 武器（含榴弹、光束、蓄力、爆炸武器）
 - 13 种目标（玩家 / AI / Vanduul / vlk / Yormandi 等）
 - 8 种护甲减伤（含超重甲 DamageCap）
-- 4 部位命中倍率 + Canvas 减伤预览
+- 4 部位命中倍率 + SVG 减伤预览
 - 单武器计算 / 左右武器对比
 - 自定义武器 / 自定义目标 / 伤害增益 / 满蓄力 / 可编辑武器参数
 - 爆炸武器按「直击 + 爆炸伤害」计算，显示爆炸半径
+- 浅色 / 深色主题一键切换，圆角简洁 UI（WebView2 渲染，参考 VRCA.Toolbox.App 风格）
 
 ## 安装与运行
 
-需要 Python 3.10+（含 tkinter）。
+需要 Python 3.10+，以及 Windows 10/11（自带 WebView2 Runtime）。
 
 ```powershell
 pip install -r requirements.txt
-python btk_calculator.py
+python main.py
 ```
 
-打包为单文件 exe（可选）：
+> 旧版 tkinter 界面保留在 `btk_calculator.py`，计算逻辑已抽取为 `btk_core.py` 供新旧界面共用。
+
+## 架构
+
+```
+main.py           # 入口：启动后端 + pywebview 打开 WebView2 窗口
+backend.py        # 本地 HTTP 服务（/api/* 计算接口 + ui/ 静态文件）
+btk_core.py       # 纯计算层（数据 + BTK/TTK/DPS 算法，无 UI）
+btk_data.py       # 数据模块（48 武器 / 12 护甲 / 13 目标）
+ui/
+  index.html      # 前端页面（圆角卡片布局）
+  style.css       # 浅/深双主题样式（CSS 变量）
+  app.js          # 前端交互（fetch 调用后端 API）
+```
+
+## 打包为单文件 exe（可选）
 
 ```powershell
 pip install pyinstaller

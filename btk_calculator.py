@@ -24,25 +24,25 @@ INF = float("inf")
 THEMES = {
     "light": {
         "BG": "#f5f6f8", "PANEL": "#ffffff",
-        "ACCENT": "#0a5ed6", "ACCENT_DK": "#0a4cc0",
+        "ACCENT": "#d97706", "ACCENT_DK": "#b45309",
         "TEXT": "#1a1d21", "MUTED": "#5f6b7a",
         "DANGER": "#dc2626", "OK": "#16a34a", "LINE": "#e2e5ea",
-        "BTN_TEXT": "#ffffff", "BTN_HOVER": "#093f9e", "BTN_DISABLED": "#a9c5f0",
+        "BTN_TEXT": "#ffffff", "BTN_HOVER": "#f59e0b", "BTN_DISABLED": "#ecd3ab",
         "INPUT_BG": "#ffffff", "CANVAS_BG": "#f8fafc", "RES_BG": "#f8fafc",
-        "THUMB_FILL_HIT": "#fca5a5", "THUMB_FILL": "#bfdbfe",
+        "THUMB_FILL_HIT": "#fca5a5", "THUMB_FILL": "#fde68a",
         "THUMB_OUTLINE": "#475569", "THUMB_DIM": "#334155",
-        "THUMB_ACCENT": "#2563eb", "BADGE": "#b45309",
+        "THUMB_ACCENT": "#d97706", "BADGE": "#b45309", "SELECT_FG": "#ffffff",
     },
     "dark": {
         "BG": "#1a1d24", "PANEL": "#242830",
-        "ACCENT": "#4d9fff", "ACCENT_DK": "#7ab8ff",
+        "ACCENT": "#f59e0b", "ACCENT_DK": "#e8a33d",
         "TEXT": "#e6e8ec", "MUTED": "#9aa1ac",
         "DANGER": "#f87171", "OK": "#34d399", "LINE": "#333845",
-        "BTN_TEXT": "#0b1420", "BTN_HOVER": "#6fb1ff", "BTN_DISABLED": "#39465c",
+        "BTN_TEXT": "#1a1d24", "BTN_HOVER": "#fbbf24", "BTN_DISABLED": "#5c4a22",
         "INPUT_BG": "#2a2f3a", "CANVAS_BG": "#1e222b", "RES_BG": "#1e222b",
-        "THUMB_FILL_HIT": "#f87171", "THUMB_FILL": "#3b82f6",
+        "THUMB_FILL_HIT": "#f87171", "THUMB_FILL": "#b45309",
         "THUMB_OUTLINE": "#4a5261", "THUMB_DIM": "#c3c9d4",
-        "THUMB_ACCENT": "#4d9fff", "BADGE": "#fbbf24",
+        "THUMB_ACCENT": "#f59e0b", "BADGE": "#fbbf24", "SELECT_FG": "#1a1d24",
     },
 }
 CURRENT_THEME = "light"
@@ -61,7 +61,7 @@ def setup_style():
         pass
     style.configure("TFrame", background=C["BG"])
     style.configure("TPanel.TFrame", background=C["PANEL"])
-    style.configure("TLabel", background=C["BG"], foreground=C["TEXT"], font=("Microsoft YaHei UI", 10))
+    style.configure("TLabel", background=C["PANEL"], foreground=C["TEXT"], font=("Microsoft YaHei UI", 10))
     style.configure("Panel.TLabel", background=C["PANEL"], foreground=C["TEXT"], font=("Microsoft YaHei UI", 10))
     style.configure("TLabelframe", background=C["BG"], bordercolor=C["LINE"], relief="solid")
     style.configure("TLabelframe.Label", background=C["BG"], foreground=C["TEXT"],
@@ -70,12 +70,124 @@ def setup_style():
                     font=("Microsoft YaHei UI", 10, "bold"))
     style.map("TButton", background=[("active", C["BTN_HOVER"]), ("disabled", C["BTN_DISABLED"])])
     style.configure("TCombobox", fieldbackground=C["INPUT_BG"], background=C["PANEL"],
-                    foreground=C["TEXT"], arrowcolor=C["MUTED"])
+                    foreground=C["TEXT"], arrowcolor=C["MUTED"], padding=(8, 2))
     style.configure("TEntry", fieldbackground=C["INPUT_BG"], foreground=C["TEXT"])
     style.configure("TCheckbutton", background=C["BG"], foreground=C["TEXT"])
     style.configure("Panel.TCheckbutton", background=C["PANEL"], foreground=C["TEXT"])
-    style.configure("Horizontal.TScale", background=C["BG"], troughcolor=C["INPUT_BG"])
+    style.configure("Horizontal.TScale", background=C["PANEL"], troughcolor=C["INPUT_BG"])
     style.configure("TRadiobutton", background=C["BG"], foreground=C["TEXT"])
+
+
+def _rounded_poly(w, h, r):
+    """圆角矩形的 12 点多边形（配合 smooth=True 形成圆角）。"""
+    return (r, 0, w - r, 0, w, 0, w, r, w, h - r, w, h,
+            w - r, h, r, h, 0, h, 0, h - r, 0, r)
+
+
+class RoundedCard(tk.Frame):
+    """圆角卡片面板：Canvas 绘制圆角矩形背景 + 标题文字，子控件放入 .body。
+    body 用 place 铺满卡片内部（place 不进入 canvas bbox，避免请求尺寸膨胀）。"""
+
+    def __init__(self, master, title="", radius=12, pad=10):
+        super().__init__(master, bd=0, highlightthickness=0)
+        self.title = title
+        self.radius = radius
+        self.pad = pad
+        C = colors()
+        self._canvas = tk.Canvas(self, bd=0, highlightthickness=0, bg=C["BG"])
+        self._canvas._is_card_bg = True
+        self._canvas.pack(fill=tk.BOTH, expand=True)
+        self.body = ttk.Frame(self._canvas, style="TPanel.TFrame")
+        self.body.place(x=0, y=0, relwidth=1, width=0, relheight=1, height=0)
+        self._bg = self._canvas.create_polygon(
+            (0, 0, 1, 0, 1, 1, 0, 1), smooth=True, fill=C["PANEL"], outline=C["LINE"])
+        self._title_id = self._canvas.create_text(
+            0, 0, text=title, anchor=tk.W,
+            font=("Microsoft YaHei UI", 10, "bold"), fill=C["TEXT"])
+        self._sep = self._canvas.create_line(0, 0, 0, 0, fill=C["LINE"])
+        self._canvas.bind("<Configure>", lambda e: self._refresh())
+        self.body.bind("<Configure>", lambda e: self._refresh())
+        self._refresh()
+
+    def _refresh(self):
+        C = colors()
+        c = self._canvas
+        w = max(c.winfo_width(), 2)
+        h = max(c.winfo_height(), 2)
+        r = min(self.radius, w // 2, h // 2)
+        c.configure(bg=C["BG"])
+        c.coords(self._bg, *_rounded_poly(w, h, r))
+        c.itemconfigure(self._bg, fill=C["PANEL"], outline=C["LINE"])
+        c.coords(self._title_id, self.pad + 4, 8)
+        c.itemconfigure(self._title_id, fill=C["TEXT"])
+        c.coords(self._sep, self.pad + 4, 25, w - self.pad - 4, 25)
+        c.itemconfigure(self._sep, fill=C["LINE"])
+        top = 30 if self.title else 6
+        self.body.place(x=self.pad, y=top, relwidth=1, width=-2 * self.pad,
+                        relheight=1, height=-(top + self.pad))
+        # 非 expand 场景：canvas 请求高度跟随内容收缩
+        req = self.body.winfo_reqheight() + top + self.pad
+        if c.winfo_height() < req:
+            c.configure(height=req)
+
+
+class RoundedButton(tk.Canvas):
+    """Canvas 圆角按钮：圆角矩形 + 文字，支持 hover / 按下变色与 command。"""
+
+    def __init__(self, master, text, command=None, radius=9, height=34, width=0,
+                 font=("Microsoft YaHei UI", 10, "bold")):
+        super().__init__(master, bd=0, highlightthickness=0, cursor="hand2",
+                         height=height, width=width)
+        self.command = command
+        self._text = text
+        self._font = font
+        self.radius = radius
+        self._hover = False
+        self._down = False
+        C = colors()
+        self._bg = self.create_polygon((0, 0, 1, 0, 1, 1, 0, 1), smooth=True, fill=C["ACCENT"])
+        self._txt = self.create_text(0, 0, text=text, font=font, fill=C["BTN_TEXT"])
+        self.bind("<Configure>", lambda e: self._refresh())
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+        self.bind("<ButtonPress-1>", self._on_press)
+        self.bind("<ButtonRelease-1>", self._on_release)
+        self._refresh()
+
+    def _refresh(self):
+        C = colors()
+        w = max(self.winfo_width(), 2)
+        h = max(self.winfo_height(), 2)
+        r = min(self.radius, w // 2, h // 2)
+        self.coords(self._bg, *_rounded_poly(w, h, r))
+        if self._down:
+            fill = C["ACCENT_DK"]
+        elif self._hover:
+            fill = C["BTN_HOVER"]
+        else:
+            fill = C["ACCENT"]
+        self.itemconfigure(self._bg, fill=fill)
+        self.coords(self._txt, w / 2, h / 2)
+        self.itemconfigure(self._txt, text=self._text, font=self._font, fill=C["BTN_TEXT"])
+
+    def _on_enter(self, e=None):
+        self._hover = True
+        self._refresh()
+
+    def _on_leave(self, e=None):
+        self._hover = False
+        self._down = False
+        self._refresh()
+
+    def _on_press(self, e=None):
+        self._down = True
+        self._refresh()
+
+    def _on_release(self, e=None):
+        self._down = False
+        self._refresh()
+        if self._hover and self.command:
+            self.command()
 
 
 def per_shot_damage(weapon, armor_mult, armor_caps, part_mult, part_cap, boost, charged):
@@ -165,15 +277,12 @@ class App:
     def _build_ui(self):
         top = ttk.Frame(self.root, padding=(12, 8, 12, 4))
         top.pack(fill=tk.X)
-        self.title_l = ttk.Label(top, text="星际公民 BTK 计算器", font=("Microsoft YaHei UI", 14, "bold"),
-                                 foreground=colors()["ACCENT_DK"])
-        self.title_l.pack(side=tk.LEFT)
-        self.mode_l = ttk.Label(top, text="模式:", foreground=colors()["MUTED"])
-        self.mode_l.pack(side=tk.LEFT, padx=(40, 4))
         for text, val in (("单武器", "single"), ("武器对比", "compare")):
             ttk.Radiobutton(top, text=text, value=val, variable=self.mode,
-                            command=self._on_mode).pack(side=tk.LEFT, padx=4)
-        self.theme_btn = ttk.Button(top, text="🌓 深色", command=self._toggle_theme)
+                            command=self._on_mode).pack(side=tk.LEFT, padx=(4, 12))
+        self.theme_btn = RoundedButton(top, text="\u263E", width=44, height=34,
+                                       font=("Segoe UI Symbol", 14),
+                                       command=self._toggle_theme)
         self.theme_btn.pack(side=tk.LEFT, padx=(24, 0))
 
         main = ttk.Frame(self.root, padding=(12, 4, 12, 12))
@@ -190,47 +299,47 @@ class App:
 
     # ---------------- 右侧 ----------------
     def _build_right_pane(self):
-        cfg = ttk.LabelFrame(self.right_pane, text="目标 / 命中 / 增益", padding=10)
+        cfg = RoundedCard(self.right_pane, title="目标 / 命中 / 增益")
         cfg.pack(fill=tk.X)
 
-        ttk.Label(cfg, text="目标类型:").grid(row=0, column=0, sticky=tk.W, pady=3)
-        tc = ttk.Combobox(cfg, textvariable=self.target_var, values=TARGET_DISPLAY,
+        ttk.Label(cfg.body, text="目标类型:").grid(row=0, column=0, sticky=tk.W, pady=3)
+        tc = ttk.Combobox(cfg.body, textvariable=self.target_var, values=TARGET_DISPLAY,
                           state="readonly", width=24)
         tc.grid(row=0, column=1, padx=8, pady=3, sticky=tk.W)
         tc.bind("<<ComboboxSelected>>", lambda e: self._on_target_changed())
 
-        ttk.Label(cfg, text="护甲类型:").grid(row=1, column=0, sticky=tk.W, pady=3)
-        ttk.Combobox(cfg, textvariable=self.armor_var, values=ARMOR_DISPLAY,
+        ttk.Label(cfg.body, text="护甲类型:").grid(row=1, column=0, sticky=tk.W, pady=3)
+        ttk.Combobox(cfg.body, textvariable=self.armor_var, values=ARMOR_DISPLAY,
                      state="readonly", width=24).grid(row=1, column=1, padx=8, pady=3, sticky=tk.W)
 
-        ttk.Label(cfg, text="命中部位:").grid(row=2, column=0, sticky=tk.W, pady=3)
-        ttk.Combobox(cfg, textvariable=self.hit_var, values=[p[0] for p in PARTS],
+        ttk.Label(cfg.body, text="命中部位:").grid(row=2, column=0, sticky=tk.W, pady=3)
+        ttk.Combobox(cfg.body, textvariable=self.hit_var, values=[p[0] for p in PARTS],
                      state="readonly", width=24).grid(row=2, column=1, padx=8, pady=3, sticky=tk.W)
 
-        ttk.Label(cfg, text="伤害增益:").grid(row=3, column=0, sticky=tk.W, pady=3)
-        row = ttk.Frame(cfg)
+        ttk.Label(cfg.body, text="伤害增益:").grid(row=3, column=0, sticky=tk.W, pady=3)
+        row = ttk.Frame(cfg.body, style="TPanel.TFrame")
         row.grid(row=3, column=1, padx=8, pady=3, sticky=tk.W)
         ttk.Scale(row, from_=-100, to=100, variable=self.boost_var, orient=tk.HORIZONTAL,
                   length=200, command=self._on_boost).pack(side=tk.LEFT)
         ttk.Label(row, textvariable=self.boost_label_var, width=7).pack(side=tk.LEFT, padx=6)
 
-        self.custom_frame = ttk.LabelFrame(self.right_pane, text="自定义目标", padding=8)
+        self.custom_frame = RoundedCard(self.right_pane, title="自定义目标", pad=8)
         fields = [("生命值", self.custom_health), ("头部倍率", self.custom_head),
                   ("躯干倍率", self.custom_torso), ("手臂倍率", self.custom_arms),
                   ("腿部倍率", self.custom_legs)]
         for i, (lab, var) in enumerate(fields):
-            ttk.Label(self.custom_frame, text=lab).grid(row=i, column=0, sticky=tk.W, pady=2)
-            ttk.Entry(self.custom_frame, textvariable=var, width=10).grid(row=i, column=1, padx=6, pady=2)
+            ttk.Label(self.custom_frame.body, text=lab).grid(row=i, column=0, sticky=tk.W, pady=2)
+            ttk.Entry(self.custom_frame.body, textvariable=var, width=10).grid(row=i, column=1, padx=6, pady=2)
 
-        thumb = ttk.LabelFrame(self.right_pane, text="目标部位减伤预览", padding=8)
+        thumb = RoundedCard(self.right_pane, title="目标部位减伤预览", pad=8)
         thumb.pack(fill=tk.X, pady=(8, 0))
-        self.thumb_canvas = tk.Canvas(thumb, width=560, height=230, bg=colors()["CANVAS_BG"],
+        self.thumb_canvas = tk.Canvas(thumb.body, width=560, height=230, bg=colors()["CANVAS_BG"],
                                       highlightthickness=1, highlightbackground=colors()["LINE"])
         self.thumb_canvas.pack(fill=tk.X)
 
-        res = ttk.LabelFrame(self.right_pane, text="计算结果", padding=8)
+        res = RoundedCard(self.right_pane, title="计算结果", pad=8)
         res.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
-        self.res_text = tk.Text(res, font=("Consolas", 10), bg=colors()["RES_BG"], relief="flat",
+        self.res_text = tk.Text(res.body, font=("Consolas", 10), bg=colors()["RES_BG"], relief="flat",
                                 wrap="word", padx=8, pady=6, state="disabled")
         self.res_text.pack(fill=tk.BOTH, expand=True)
         self.res_text.tag_configure("title", font=("Microsoft YaHei UI", 11, "bold"), foreground=colors()["ACCENT_DK"])
@@ -241,49 +350,49 @@ class App:
 
     # ---------------- 左侧 ----------------
     def _build_single(self):
-        sel = ttk.LabelFrame(self.left_pane, text="武器选择", padding=10)
+        sel = RoundedCard(self.left_pane, title="武器选择")
         sel.pack(fill=tk.X)
-        ttk.Label(sel, text="分类:").grid(row=0, column=0, sticky=tk.W, pady=3)
-        cc = ttk.Combobox(sel, values=CATEGORIES, state="readonly", width=26, textvariable=self.cat_var)
+        ttk.Label(sel.body, text="分类:").grid(row=0, column=0, sticky=tk.W, pady=3)
+        cc = ttk.Combobox(sel.body, values=CATEGORIES, state="readonly", width=26, textvariable=self.cat_var)
         cc.grid(row=0, column=1, padx=8, pady=3, sticky=tk.W)
         cc.bind("<<ComboboxSelected>>", self._on_cat_l)
-        ttk.Label(sel, text="武器:").grid(row=1, column=0, sticky=tk.W, pady=3)
-        self.wcombo_l = ttk.Combobox(sel, textvariable=self.wvar_l, state="readonly", width=34)
+        ttk.Label(sel.body, text="武器:").grid(row=1, column=0, sticky=tk.W, pady=3)
+        self.wcombo_l = ttk.Combobox(sel.body, textvariable=self.wvar_l, state="readonly", width=34)
         self.wcombo_l.grid(row=1, column=1, padx=8, pady=3, sticky=tk.W)
         self.wcombo_l.bind("<<ComboboxSelected>>", lambda e: self._on_weapon_changed("l"))
-        self.charge_chk_l = ttk.Checkbutton(sel, text="满蓄力", variable=self.charged_l,
+        self.charge_chk_l = ttk.Checkbutton(sel.body, text="满蓄力", variable=self.charged_l,
                                             style="Panel.TCheckbutton")
         self.charge_chk_l.grid(row=2, column=1, sticky=tk.W, padx=8, pady=3)
         self.chk_l = self.charge_chk_l
 
         # 自定义武器输入
-        self.cw_frame = ttk.LabelFrame(self.left_pane, text="自定义武器属性", padding=8)
+        self.cw_frame = RoundedCard(self.left_pane, title="自定义武器属性", pad=8)
         cw_fields = [("伤害/发", self.cw_damage), ("射速 RPM", self.cw_rpm), ("弹丸数", self.cw_pellet)]
         for i, (lab, var) in enumerate(cw_fields):
-            ttk.Label(self.cw_frame, text=lab).grid(row=i, column=0, sticky=tk.W, pady=2)
-            ttk.Entry(self.cw_frame, textvariable=var, width=10).grid(row=i, column=1, padx=6, pady=2)
-        ttk.Label(self.cw_frame, text="伤害类型:").grid(row=3, column=0, sticky=tk.W, pady=2)
-        ttk.Combobox(self.cw_frame, textvariable=self.cw_type, values=["物理", "能量"],
+            ttk.Label(self.cw_frame.body, text=lab).grid(row=i, column=0, sticky=tk.W, pady=2)
+            ttk.Entry(self.cw_frame.body, textvariable=var, width=10).grid(row=i, column=1, padx=6, pady=2)
+        ttk.Label(self.cw_frame.body, text="伤害类型:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        ttk.Combobox(self.cw_frame.body, textvariable=self.cw_type, values=["物理", "能量"],
                      state="readonly", width=10).grid(row=3, column=1, padx=6, pady=2, sticky=tk.W)
         self.cw_frame.pack_forget()
 
         # 可编辑武器参数
-        params = ttk.LabelFrame(self.left_pane, text="武器参数（可直接修改，改后按自定义计算）", padding=10)
+        params = RoundedCard(self.left_pane, title="武器参数（可直接修改，改后按自定义计算）")
         params.pack(fill=tk.X, pady=(8, 0))
-        ttk.Label(params, text="伤害 Alpha:").grid(row=0, column=0, sticky=tk.W, pady=3)
-        self.edit_alpha_entry = ttk.Entry(params, textvariable=self.edit_alpha, width=10)
+        ttk.Label(params.body, text="伤害 Alpha:").grid(row=0, column=0, sticky=tk.W, pady=3)
+        self.edit_alpha_entry = ttk.Entry(params.body, textvariable=self.edit_alpha, width=10)
         self.edit_alpha_entry.grid(row=0, column=1, padx=8, pady=3, sticky=tk.W)
-        ttk.Label(params, text="射速 RPM:").grid(row=1, column=0, sticky=tk.W, pady=3)
-        self.edit_rpm_entry = ttk.Entry(params, textvariable=self.edit_rpm, width=10)
+        ttk.Label(params.body, text="射速 RPM:").grid(row=1, column=0, sticky=tk.W, pady=3)
+        self.edit_rpm_entry = ttk.Entry(params.body, textvariable=self.edit_rpm, width=10)
         self.edit_rpm_entry.grid(row=1, column=1, padx=8, pady=3, sticky=tk.W)
-        self.custom_badge_l = tk.Label(params, text="", fg=colors()["BADGE"], bg=colors()["PANEL"],
+        self.custom_badge_l = tk.Label(params.body, text="", fg=colors()["BADGE"], bg=colors()["PANEL"],
                                        font=("Microsoft YaHei UI", 9, "bold"))
         self.custom_badge_l._semantic = "badge"
         self.custom_badge_l.grid(row=0, column=2, rowspan=2, padx=8)
 
-        info = ttk.LabelFrame(self.left_pane, text="武器信息", padding=10)
+        info = RoundedCard(self.left_pane, title="武器信息")
         info.pack(fill=tk.X, pady=(8, 0))
-        self.info_l = tk.Label(info, text="", justify=tk.LEFT, bg=colors()["PANEL"], fg=colors()["MUTED"],
+        self.info_l = tk.Label(info.body, text="", justify=tk.LEFT, bg=colors()["PANEL"], fg=colors()["MUTED"],
                                font=("Microsoft YaHei UI", 9))
         self.info_l._semantic = "muted"
         self.info_l.pack(anchor=tk.W)
@@ -294,7 +403,7 @@ class App:
         self.warn_l._semantic = "danger"
         self.warn_l.pack(anchor=tk.W, pady=(8, 0))
 
-        ttk.Button(self.left_pane, text="计算 BTK", command=self._auto_run).pack(fill=tk.X, pady=(10, 0))
+        RoundedButton(self.left_pane, text="计算 BTK", command=self._auto_run).pack(fill=tk.X, pady=(10, 0))
         self._on_cat_l()
 
     def _build_compare(self):
@@ -306,30 +415,30 @@ class App:
         rf.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(6, 0))
         self._cmp_panel(lf, "左侧", "l", self.wvar_l, self.charged_l)
         self._cmp_panel(rf, "右侧", "r", self.wvar_r, self.charged_r)
-        ttk.Button(frame, text="计算对比", command=self._auto_run).pack(fill=tk.X, pady=(8, 0))
+        RoundedButton(frame, text="计算对比", command=self._auto_run).pack(fill=tk.X, pady=(8, 0))
 
     def _cmp_panel(self, parent, title, side, wvar, charged_var):
-        f = ttk.LabelFrame(parent, text=title, padding=10)
+        f = RoundedCard(parent, title=title)
         f.pack(fill=tk.BOTH, expand=True)
-        ttk.Label(f, text="分类:").grid(row=0, column=0, sticky=tk.W, pady=3)
+        ttk.Label(f.body, text="分类:").grid(row=0, column=0, sticky=tk.W, pady=3)
         catvar = tk.StringVar()
-        ccombo = ttk.Combobox(f, textvariable=catvar, values=CATEGORIES_MAIN, state="readonly", width=15)
+        ccombo = ttk.Combobox(f.body, textvariable=catvar, values=CATEGORIES_MAIN, state="readonly", width=15)
         ccombo.grid(row=0, column=1, padx=6, pady=3)
-        ttk.Label(f, text="武器:").grid(row=1, column=0, sticky=tk.W, pady=3)
-        cb = ttk.Combobox(f, textvariable=wvar, state="readonly", width=26)
+        ttk.Label(f.body, text="武器:").grid(row=1, column=0, sticky=tk.W, pady=3)
+        cb = ttk.Combobox(f.body, textvariable=wvar, state="readonly", width=26)
         cb.grid(row=1, column=1, padx=6, pady=3, sticky=tk.W)
         ccombo.bind("<<ComboboxSelected>>", lambda e: self._fill_weapons(cb, catvar.get()))
         cb.bind("<<ComboboxSelected>>", lambda e: self._on_weapon_changed(side))
-        chk = ttk.Checkbutton(f, text="满蓄力", variable=charged_var, style="Panel.TCheckbutton")
+        chk = ttk.Checkbutton(f.body, text="满蓄力", variable=charged_var, style="Panel.TCheckbutton")
         chk.grid(row=2, column=1, sticky=tk.W, padx=6)
         # 可编辑参数
-        ttk.Label(f, text="伤害:").grid(row=3, column=0, sticky=tk.W, pady=3)
+        ttk.Label(f.body, text="伤害:").grid(row=3, column=0, sticky=tk.W, pady=3)
         ev = tk.StringVar()
-        ttk.Entry(f, textvariable=ev, width=8).grid(row=3, column=1, padx=6, pady=3, sticky=tk.W)
-        ttk.Label(f, text="射速:").grid(row=4, column=0, sticky=tk.W, pady=3)
+        ttk.Entry(f.body, textvariable=ev, width=8).grid(row=3, column=1, padx=6, pady=3, sticky=tk.W)
+        ttk.Label(f.body, text="射速:").grid(row=4, column=0, sticky=tk.W, pady=3)
         ev2 = tk.StringVar()
-        ttk.Entry(f, textvariable=ev2, width=8).grid(row=4, column=1, padx=6, pady=3, sticky=tk.W)
-        label = tk.Label(f, text="", justify=tk.LEFT, bg=colors()["PANEL"], fg=colors()["MUTED"],
+        ttk.Entry(f.body, textvariable=ev2, width=8).grid(row=4, column=1, padx=6, pady=3, sticky=tk.W)
+        label = tk.Label(f.body, text="", justify=tk.LEFT, bg=colors()["PANEL"], fg=colors()["MUTED"],
                          font=("Microsoft YaHei UI", 9), wraplength=240)
         label._semantic = "muted"
         label.grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=(8, 0))
@@ -357,15 +466,41 @@ class App:
         self._apply_theme()
         self._auto_run()
 
+    def _fix_combobox_popdown(self):
+        """修复深色/浅色下 Combobox 下拉列表配色（用户痛点：深色白底白字）。"""
+        C = THEMES[self.theme]
+        for opt, val in (("*TCombobox*Listbox.background", C["INPUT_BG"]),
+                         ("*TCombobox*Listbox.foreground", C["TEXT"]),
+                         ("*TCombobox*Listbox.selectBackground", C["ACCENT"]),
+                         ("*TCombobox*Listbox.selectForeground", C["SELECT_FG"]),
+                         ("*TCombobox*Listbox.borderWidth", 1),
+                         ("*TCombobox*Listbox.relief", "flat")):
+            self.root.option_add(opt, val)
+        # 已存在的 popdown 直接改（option_add 只影响新建的 Listbox）
+        for w in self._walk():
+            if isinstance(w, ttk.Combobox):
+                try:
+                    pop_name = w.tk.call("ttk::combobox::PopdownWindow", w._w)
+                    lb_path = pop_name + ".f.l"
+                    w.tk.call(lb_path, "configure",
+                              "-bg", C["INPUT_BG"], "-fg", C["TEXT"],
+                              "-selectbackground", C["ACCENT"], "-selectforeground", C["SELECT_FG"],
+                              "-highlightthickness", 1, "-highlightbackground", C["LINE"],
+                              "-borderwidth", 0, "-relief", "flat")
+                    w.tk.call(pop_name, "configure", "-bg", C["INPUT_BG"])
+                except tk.TclError:
+                    pass
+
     def _apply_theme(self):
         global CURRENT_THEME
         CURRENT_THEME = self.theme
         C = THEMES[self.theme]
         setup_style()
         self.root.configure(bg=C["BG"])
-        self.title_l.configure(foreground=C["ACCENT_DK"])
-        self.mode_l.configure(foreground=C["MUTED"])
-        self.theme_btn.configure(text="🌓 浅色" if self.theme == "dark" else "🌓 深色")
+        self._fix_combobox_popdown()
+        # 主题切换按钮图标：深色显示 ☀（点击回浅色），浅色显示 ☾（点击进深色）
+        self.theme_btn._text = "\u2600" if self.theme == "dark" else "\u263E"
+        self.theme_btn._refresh()
         self.res_text.configure(bg=C["RES_BG"], fg=C["TEXT"])
         self.res_text.tag_configure("title", foreground=C["ACCENT_DK"])
         self.res_text.tag_configure("big", foreground=C["DANGER"])
@@ -373,14 +508,18 @@ class App:
         self.res_text.tag_configure("part", foreground=C["TEXT"])
         self.res_text.tag_configure("custom", foreground=C["BADGE"])
         for w in self._walk():
-            if isinstance(w, tk.Label):
+            if isinstance(w, RoundedCard):
+                w._refresh()
+            elif isinstance(w, RoundedButton):
+                w._refresh()
+            elif isinstance(w, tk.Label):
                 sem = getattr(w, "_semantic", "text")
                 fg = {"badge": C["BADGE"], "danger": C["DANGER"],
                       "muted": C["MUTED"]}.get(sem, C["TEXT"])
                 w.configure(bg=C["PANEL"], fg=fg)
             elif isinstance(w, tk.Text):
                 w.configure(bg=C["RES_BG"], fg=C["TEXT"])
-            elif isinstance(w, tk.Canvas):
+            elif isinstance(w, tk.Canvas) and not getattr(w, "_is_card_bg", False):
                 w.configure(bg=C["CANVAS_BG"], highlightbackground=C["LINE"])
 
     # ---------------- 事件 ----------------
@@ -673,7 +812,7 @@ class App:
                           font=("Microsoft YaHei UI", 8), fill=C["MUTED"])
         c.create_text(bx, y0 + 132, text="目标 %d HP | %s" % (target["health"], self.armor_var.get()),
                       anchor=tk.W, font=("Microsoft YaHei UI", 8, "bold"), fill=C["THUMB_DIM"])
-        c.create_text(bx, y0 + 150, text="（红=部位倍率  蓝=护甲倍率  绿=总倍率）", anchor=tk.W,
+        c.create_text(bx, y0 + 150, text="（红=部位倍率  橙=护甲倍率  绿=总倍率）", anchor=tk.W,
                       font=("Microsoft YaHei UI", 8), fill=C["MUTED"])
 
     # ---------------- 计算 ----------------

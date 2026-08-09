@@ -1,0 +1,3 @@
+# 运行时依赖：主程序仅用标准库（tkinter / math / json）
+# 数据生成需要 openpyxl（旧 xlsx 管道）不再需要；generate_data.py 只用标准库
+# 如无需打包，无任何第三方依赖

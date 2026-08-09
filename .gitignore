@@ -1,0 +1,10 @@
+# 解包数据快照（体积大，用 generate_data.py 可重新生成，不纳入版本控制）
+game_data/Data/
+game_data/full_extract/
+
+# Agent 工具目录
+.omo/
+.codegraph/
+
+# 技能包（独立工具集，含第三方二进制 starbreaker.exe，不属于本软件）
+skills/

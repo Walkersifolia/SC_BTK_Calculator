@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 """星际公民 BTK 计算器 v3"""
 import math
+import sys
 import tkinter as tk
 from tkinter import ttk
 
@@ -20,39 +21,61 @@ PARTS = [("头部", "head"), ("躯干", "torso"), ("手臂", "arms"), ("腿部",
 
 INF = float("inf")
 
-BG = "#eef1f6"
-PANEL = "#ffffff"
-ACCENT = "#2563eb"
-ACCENT_DK = "#1d4ed8"
-TEXT = "#1e293b"
-MUTED = "#64748b"
-DANGER = "#dc2626"
-OK = "#16a34a"
-LINE = "#cbd5e1"
+THEMES = {
+    "light": {
+        "BG": "#f5f6f8", "PANEL": "#ffffff",
+        "ACCENT": "#0a5ed6", "ACCENT_DK": "#0a4cc0",
+        "TEXT": "#1a1d21", "MUTED": "#5f6b7a",
+        "DANGER": "#dc2626", "OK": "#16a34a", "LINE": "#e2e5ea",
+        "BTN_TEXT": "#ffffff", "BTN_HOVER": "#093f9e", "BTN_DISABLED": "#a9c5f0",
+        "INPUT_BG": "#ffffff", "CANVAS_BG": "#f8fafc", "RES_BG": "#f8fafc",
+        "THUMB_FILL_HIT": "#fca5a5", "THUMB_FILL": "#bfdbfe",
+        "THUMB_OUTLINE": "#475569", "THUMB_DIM": "#334155",
+        "THUMB_ACCENT": "#2563eb", "BADGE": "#b45309",
+    },
+    "dark": {
+        "BG": "#1a1d24", "PANEL": "#242830",
+        "ACCENT": "#4d9fff", "ACCENT_DK": "#7ab8ff",
+        "TEXT": "#e6e8ec", "MUTED": "#9aa1ac",
+        "DANGER": "#f87171", "OK": "#34d399", "LINE": "#333845",
+        "BTN_TEXT": "#0b1420", "BTN_HOVER": "#6fb1ff", "BTN_DISABLED": "#39465c",
+        "INPUT_BG": "#2a2f3a", "CANVAS_BG": "#1e222b", "RES_BG": "#1e222b",
+        "THUMB_FILL_HIT": "#f87171", "THUMB_FILL": "#3b82f6",
+        "THUMB_OUTLINE": "#4a5261", "THUMB_DIM": "#c3c9d4",
+        "THUMB_ACCENT": "#4d9fff", "BADGE": "#fbbf24",
+    },
+}
+CURRENT_THEME = "light"
+
+
+def colors():
+    return THEMES[CURRENT_THEME]
 
 
 def setup_style():
+    C = THEMES[CURRENT_THEME]
     style = ttk.Style()
     try:
         style.theme_use("clam")
     except tk.TclError:
         pass
-    style.configure("TFrame", background=BG)
-    style.configure("TPanel.TFrame", background=PANEL)
-    style.configure("TLabel", background=BG, foreground=TEXT, font=("Microsoft YaHei UI", 10))
-    style.configure("Panel.TLabel", background=PANEL, foreground=TEXT, font=("Microsoft YaHei UI", 10))
-    style.configure("TLabelframe", background=BG, bordercolor=LINE, relief="solid")
-    style.configure("TLabelframe.Label", background=BG, foreground=TEXT,
+    style.configure("TFrame", background=C["BG"])
+    style.configure("TPanel.TFrame", background=C["PANEL"])
+    style.configure("TLabel", background=C["BG"], foreground=C["TEXT"], font=("Microsoft YaHei UI", 10))
+    style.configure("Panel.TLabel", background=C["PANEL"], foreground=C["TEXT"], font=("Microsoft YaHei UI", 10))
+    style.configure("TLabelframe", background=C["BG"], bordercolor=C["LINE"], relief="solid")
+    style.configure("TLabelframe.Label", background=C["BG"], foreground=C["TEXT"],
                     font=("Microsoft YaHei UI", 10, "bold"))
-    style.configure("TButton", background=ACCENT, foreground="white", padding=(14, 7),
+    style.configure("TButton", background=C["ACCENT"], foreground=C["BTN_TEXT"], padding=(14, 7),
                     font=("Microsoft YaHei UI", 10, "bold"))
-    style.map("TButton", background=[("active", ACCENT_DK), ("disabled", "#93b4f5")])
-    style.configure("TCombobox", fieldbackground=PANEL, background=PANEL, foreground=TEXT)
-    style.configure("TEntry", fieldbackground=PANEL, foreground=TEXT)
-    style.configure("TCheckbutton", background=BG, foreground=TEXT)
-    style.configure("Panel.TCheckbutton", background=PANEL, foreground=TEXT)
-    style.configure("Horizontal.TScale", background=BG)
-    style.configure("TRadiobutton", background=BG, foreground=TEXT)
+    style.map("TButton", background=[("active", C["BTN_HOVER"]), ("disabled", C["BTN_DISABLED"])])
+    style.configure("TCombobox", fieldbackground=C["INPUT_BG"], background=C["PANEL"],
+                    foreground=C["TEXT"], arrowcolor=C["MUTED"])
+    style.configure("TEntry", fieldbackground=C["INPUT_BG"], foreground=C["TEXT"])
+    style.configure("TCheckbutton", background=C["BG"], foreground=C["TEXT"])
+    style.configure("Panel.TCheckbutton", background=C["PANEL"], foreground=C["TEXT"])
+    style.configure("Horizontal.TScale", background=C["BG"], troughcolor=C["INPUT_BG"])
+    style.configure("TRadiobutton", background=C["BG"], foreground=C["TEXT"])
 
 
 def per_shot_damage(weapon, armor_mult, armor_caps, part_mult, part_cap, boost, charged):
@@ -103,7 +126,8 @@ class App:
         root.title("星际公民 BTK 计算器")
         root.geometry("1380x880")
         root.minsize(1120, 740)
-        root.configure(bg=BG)
+
+        self.theme = "light"
 
         self.mode = tk.StringVar(value="single")
         self.boost_var = tk.DoubleVar(value=0.0)
@@ -141,12 +165,16 @@ class App:
     def _build_ui(self):
         top = ttk.Frame(self.root, padding=(12, 8, 12, 4))
         top.pack(fill=tk.X)
-        ttk.Label(top, text="星际公民 BTK 计算器", font=("Microsoft YaHei UI", 14, "bold"),
-                  foreground=ACCENT_DK).pack(side=tk.LEFT)
-        ttk.Label(top, text="模式:", foreground=MUTED).pack(side=tk.LEFT, padx=(40, 4))
+        self.title_l = ttk.Label(top, text="星际公民 BTK 计算器", font=("Microsoft YaHei UI", 14, "bold"),
+                                 foreground=colors()["ACCENT_DK"])
+        self.title_l.pack(side=tk.LEFT)
+        self.mode_l = ttk.Label(top, text="模式:", foreground=colors()["MUTED"])
+        self.mode_l.pack(side=tk.LEFT, padx=(40, 4))
         for text, val in (("单武器", "single"), ("武器对比", "compare")):
             ttk.Radiobutton(top, text=text, value=val, variable=self.mode,
                             command=self._on_mode).pack(side=tk.LEFT, padx=4)
+        self.theme_btn = ttk.Button(top, text="🌓 深色", command=self._toggle_theme)
+        self.theme_btn.pack(side=tk.LEFT, padx=(24, 0))
 
         main = ttk.Frame(self.root, padding=(12, 4, 12, 12))
         main.pack(fill=tk.BOTH, expand=True)
@@ -158,6 +186,7 @@ class App:
         self._build_right_pane()
         self._on_mode()
         self._on_target_changed()
+        self._apply_theme()
 
     # ---------------- 右侧 ----------------
     def _build_right_pane(self):
@@ -195,20 +224,20 @@ class App:
 
         thumb = ttk.LabelFrame(self.right_pane, text="目标部位减伤预览", padding=8)
         thumb.pack(fill=tk.X, pady=(8, 0))
-        self.thumb_canvas = tk.Canvas(thumb, width=560, height=230, bg="#f8fafc",
-                                      highlightthickness=1, highlightbackground=LINE)
+        self.thumb_canvas = tk.Canvas(thumb, width=560, height=230, bg=colors()["CANVAS_BG"],
+                                      highlightthickness=1, highlightbackground=colors()["LINE"])
         self.thumb_canvas.pack(fill=tk.X)
 
         res = ttk.LabelFrame(self.right_pane, text="计算结果", padding=8)
         res.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
-        self.res_text = tk.Text(res, font=("Consolas", 10), bg="#f8fafc", relief="flat",
+        self.res_text = tk.Text(res, font=("Consolas", 10), bg=colors()["RES_BG"], relief="flat",
                                 wrap="word", padx=8, pady=6, state="disabled")
         self.res_text.pack(fill=tk.BOTH, expand=True)
-        self.res_text.tag_configure("title", font=("Microsoft YaHei UI", 11, "bold"), foreground=ACCENT_DK)
-        self.res_text.tag_configure("big", font=("Microsoft YaHei UI", 15, "bold"), foreground=DANGER)
-        self.res_text.tag_configure("muted", foreground=MUTED)
+        self.res_text.tag_configure("title", font=("Microsoft YaHei UI", 11, "bold"), foreground=colors()["ACCENT_DK"])
+        self.res_text.tag_configure("big", font=("Microsoft YaHei UI", 15, "bold"), foreground=colors()["DANGER"])
+        self.res_text.tag_configure("muted", foreground=colors()["MUTED"])
         self.res_text.tag_configure("part", font=("Microsoft YaHei UI", 9))
-        self.res_text.tag_configure("custom", foreground="#b45309", font=("Microsoft YaHei UI", 9, "bold"))
+        self.res_text.tag_configure("custom", foreground=colors()["BADGE"], font=("Microsoft YaHei UI", 9, "bold"))
 
     # ---------------- 左侧 ----------------
     def _build_single(self):
@@ -247,18 +276,22 @@ class App:
         ttk.Label(params, text="射速 RPM:").grid(row=1, column=0, sticky=tk.W, pady=3)
         self.edit_rpm_entry = ttk.Entry(params, textvariable=self.edit_rpm, width=10)
         self.edit_rpm_entry.grid(row=1, column=1, padx=8, pady=3, sticky=tk.W)
-        self.custom_badge_l = tk.Label(params, text="", fg="#b45309", bg=PANEL,
+        self.custom_badge_l = tk.Label(params, text="", fg=colors()["BADGE"], bg=colors()["PANEL"],
                                        font=("Microsoft YaHei UI", 9, "bold"))
+        self.custom_badge_l._semantic = "badge"
         self.custom_badge_l.grid(row=0, column=2, rowspan=2, padx=8)
 
         info = ttk.LabelFrame(self.left_pane, text="武器信息", padding=10)
         info.pack(fill=tk.X, pady=(8, 0))
-        self.info_l = tk.Label(info, text="", justify=tk.LEFT, bg=PANEL, fg=MUTED,
+        self.info_l = tk.Label(info, text="", justify=tk.LEFT, bg=colors()["PANEL"], fg=colors()["MUTED"],
                                font=("Microsoft YaHei UI", 9))
+        self.info_l._semantic = "muted"
         self.info_l.pack(anchor=tk.W)
 
-        self.warn_l = tk.Label(self.left_pane, text="", fg=DANGER, justify=tk.LEFT, bg=PANEL,
-                               font=("Microsoft YaHei UI", 11, "bold"), wraplength=500)
+        self.warn_l = tk.Label(self.left_pane, text="", fg=colors()["DANGER"], justify=tk.LEFT,
+                               bg=colors()["PANEL"], font=("Microsoft YaHei UI", 11, "bold"),
+                               wraplength=500)
+        self.warn_l._semantic = "danger"
         self.warn_l.pack(anchor=tk.W, pady=(8, 0))
 
         ttk.Button(self.left_pane, text="计算 BTK", command=self._auto_run).pack(fill=tk.X, pady=(10, 0))
@@ -296,8 +329,9 @@ class App:
         ttk.Label(f, text="射速:").grid(row=4, column=0, sticky=tk.W, pady=3)
         ev2 = tk.StringVar()
         ttk.Entry(f, textvariable=ev2, width=8).grid(row=4, column=1, padx=6, pady=3, sticky=tk.W)
-        label = tk.Label(f, text="", justify=tk.LEFT, bg=PANEL, fg=MUTED,
+        label = tk.Label(f, text="", justify=tk.LEFT, bg=colors()["PANEL"], fg=colors()["MUTED"],
                          font=("Microsoft YaHei UI", 9), wraplength=240)
+        label._semantic = "muted"
         label.grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=(8, 0))
         setattr(self, "info_" + side, label)
         setattr(self, "chk_" + side, chk)
@@ -309,6 +343,45 @@ class App:
             catvar.set(CATEGORIES_MAIN[0])
         self._fill_weapons(cb, catvar.get())
         self._on_weapon_changed(side)
+
+    # ---------------- 主题 ----------------
+    def _walk(self):
+        stack = [self.root]
+        while stack:
+            w = stack.pop()
+            yield w
+            stack.extend(w.winfo_children())
+
+    def _toggle_theme(self):
+        self.theme = "dark" if self.theme == "light" else "light"
+        self._apply_theme()
+        self._auto_run()
+
+    def _apply_theme(self):
+        global CURRENT_THEME
+        CURRENT_THEME = self.theme
+        C = THEMES[self.theme]
+        setup_style()
+        self.root.configure(bg=C["BG"])
+        self.title_l.configure(foreground=C["ACCENT_DK"])
+        self.mode_l.configure(foreground=C["MUTED"])
+        self.theme_btn.configure(text="🌓 浅色" if self.theme == "dark" else "🌓 深色")
+        self.res_text.configure(bg=C["RES_BG"], fg=C["TEXT"])
+        self.res_text.tag_configure("title", foreground=C["ACCENT_DK"])
+        self.res_text.tag_configure("big", foreground=C["DANGER"])
+        self.res_text.tag_configure("muted", foreground=C["MUTED"])
+        self.res_text.tag_configure("part", foreground=C["TEXT"])
+        self.res_text.tag_configure("custom", foreground=C["BADGE"])
+        for w in self._walk():
+            if isinstance(w, tk.Label):
+                sem = getattr(w, "_semantic", "text")
+                fg = {"badge": C["BADGE"], "danger": C["DANGER"],
+                      "muted": C["MUTED"]}.get(sem, C["TEXT"])
+                w.configure(bg=C["PANEL"], fg=fg)
+            elif isinstance(w, tk.Text):
+                w.configure(bg=C["RES_BG"], fg=C["TEXT"])
+            elif isinstance(w, tk.Canvas):
+                w.configure(bg=C["CANVAS_BG"], highlightbackground=C["LINE"])
 
     # ---------------- 事件 ----------------
     def _bind_auto(self):
@@ -565,17 +638,18 @@ class App:
         armor_mult = am["mult"][dom]
 
         hit_key = dict(PARTS)[self.hit_var.get()]
+        C = THEMES[self.theme]
         for key, box in shapes.items():
-            fill = "#fca5a5" if key == hit_key else "#bfdbfe"
+            fill = C["THUMB_FILL_HIT"] if key == hit_key else C["THUMB_FILL"]
             if isinstance(box, tuple) and isinstance(box[0], tuple):
                 for b in box:
-                    c.create_rectangle(*b, fill=fill, outline="#475569")
+                    c.create_rectangle(*b, fill=fill, outline=C["THUMB_OUTLINE"])
             else:
-                c.create_rectangle(*box, fill=fill, outline="#475569")
+                c.create_rectangle(*box, fill=fill, outline=C["THUMB_OUTLINE"])
 
         bx = 90
         c.create_text(bx, y0 - 2, text="部位减伤 × 护甲减伤 = 总减伤", anchor=tk.W,
-                      font=("Microsoft YaHei UI", 8, "bold"), fill=ACCENT_DK)
+                      font=("Microsoft YaHei UI", 8, "bold"), fill=C["ACCENT_DK"])
         for i, (pname, pkey) in enumerate(PARTS):
             yy = y0 + 6 + i * 30
             pm = target["parts"][pkey]
@@ -583,24 +657,24 @@ class App:
             sel = pname == self.hit_var.get()
             c.create_text(bx, yy, text="%s" % pname, anchor=tk.W,
                           font=("Microsoft YaHei UI", 9, "bold"),
-                          fill="#dc2626" if sel else "#334155")
+                          fill=C["DANGER"] if sel else C["THUMB_DIM"])
             c.create_text(bx + 30, yy, text="x%.2f" % pm, anchor=tk.W,
-                          font=("Microsoft YaHei UI", 10, "bold"), fill="#dc2626")
-            c.create_text(bx + 86, yy, text="x", anchor=tk.W, font=("Microsoft YaHei UI", 10), fill=MUTED)
+                          font=("Microsoft YaHei UI", 10, "bold"), fill=C["DANGER"])
+            c.create_text(bx + 86, yy, text="x", anchor=tk.W, font=("Microsoft YaHei UI", 10), fill=C["MUTED"])
             c.create_text(bx + 102, yy, text="%.2f" % armor_mult, anchor=tk.W,
-                          font=("Microsoft YaHei UI", 10, "bold"), fill="#2563eb")
-            c.create_text(bx + 158, yy, text="=", anchor=tk.W, font=("Microsoft YaHei UI", 10), fill=MUTED)
+                          font=("Microsoft YaHei UI", 10, "bold"), fill=C["THUMB_ACCENT"])
+            c.create_text(bx + 158, yy, text="=", anchor=tk.W, font=("Microsoft YaHei UI", 10), fill=C["MUTED"])
             c.create_text(bx + 174, yy, text="%.2f" % tm, anchor=tk.W,
-                          font=("Microsoft YaHei UI", 11, "bold"), fill="#16a34a")
+                          font=("Microsoft YaHei UI", 11, "bold"), fill=C["OK"])
             dmg = per_shot_damage(weapon, am["mult"], am.get("caps", {}), pm, target.get("cap"),
                                   self.boost_var.get() / 100.0, self.charged_l.get())
             btk = math.ceil(target["health"] / dmg) if dmg > 0 else INF
             c.create_text(bx + 240, yy, text="伤害 %.1f | BTK %s" % (dmg, fmt_btk(btk)), anchor=tk.W,
-                          font=("Microsoft YaHei UI", 8), fill=MUTED)
+                          font=("Microsoft YaHei UI", 8), fill=C["MUTED"])
         c.create_text(bx, y0 + 132, text="目标 %d HP | %s" % (target["health"], self.armor_var.get()),
-                      anchor=tk.W, font=("Microsoft YaHei UI", 8, "bold"), fill="#475569")
+                      anchor=tk.W, font=("Microsoft YaHei UI", 8, "bold"), fill=C["THUMB_DIM"])
         c.create_text(bx, y0 + 150, text="（红=部位倍率  蓝=护甲倍率  绿=总倍率）", anchor=tk.W,
-                      font=("Microsoft YaHei UI", 8), fill=MUTED)
+                      font=("Microsoft YaHei UI", 8), fill=C["MUTED"])
 
     # ---------------- 计算 ----------------
     def _calc_single(self):
@@ -668,10 +742,27 @@ class App:
         self.res_text.config(state="disabled")
 
 
+def _icon_path():
+    """定位应用图标：PyInstaller 解包目录或源码目录。"""
+    import os
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    for name in ("app_icon_black.ico", "app_icon_white.ico"):
+        p = os.path.join(base, name)
+        if os.path.exists(p):
+            return p
+    return None
+
+
 def main():
     root = tk.Tk()
     root.option_add("*Font", ("Microsoft YaHei UI", 10))
     setup_style()
+    icon = _icon_path()
+    if icon:
+        try:
+            root.iconbitmap(icon)
+        except tk.TclError:
+            pass
     App(root)
     root.mainloop()
 

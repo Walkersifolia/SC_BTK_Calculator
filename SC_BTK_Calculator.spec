@@ -5,7 +5,7 @@ a = Analysis(
     ['btk_calculator.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('app_icon_black.ico', '.'), ('app_icon_white.ico', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,4 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='app_icon_black.ico',
 )

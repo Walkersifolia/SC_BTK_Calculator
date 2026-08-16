@@ -32,13 +32,21 @@
           <div class="field">
             <label>分类</label>
             <div class="select-wrap">
-              <select id="catSelect"></select>
+              <button type="button" class="dselect" data-for="catSelect" aria-haspopup="listbox" aria-expanded="false">
+                <span class="dselect-label"></span>
+              </button>
+              <div class="dmenu" data-menu-for="catSelect" role="listbox" hidden></div>
+              <select id="catSelect" hidden></select>
             </div>
           </div>
           <div class="field">
             <label>武器</label>
             <div class="select-wrap">
-              <select id="weaponSelect"></select>
+              <button type="button" class="dselect" data-for="weaponSelect" aria-haspopup="listbox" aria-expanded="false">
+                <span class="dselect-label"></span>
+              </button>
+              <div class="dmenu" data-menu-for="weaponSelect" role="listbox" hidden></div>
+              <select id="weaponSelect" hidden></select>
             </div>
           </div>
           <div class="field">
@@ -57,7 +65,13 @@
           <div class="field"><label>弹丸数</label><input type="number" id="cwPellet" value="1" min="1"></div>
           <div class="field">
             <label>伤害类型</label>
-            <div class="select-wrap"><select id="cwType"><option>物理</option><option>能量</option></select></div>
+            <div class="select-wrap">
+              <button type="button" class="dselect" data-for="cwType" aria-haspopup="listbox" aria-expanded="false">
+                <span class="dselect-label"></span>
+              </button>
+              <div class="dmenu" data-menu-for="cwType" role="listbox" hidden></div>
+              <select id="cwType" hidden><option>物理</option><option>能量</option></select>
+            </div>
           </div>
         </div>
 
@@ -82,8 +96,16 @@
         <div class="compare-grid">
           <div class="card">
             <div class="card-title">左侧</div>
-            <div class="field"><label>分类</label><div class="select-wrap"><select id="cmpLCat"></select></div></div>
-            <div class="field"><label>武器</label><div class="select-wrap"><select id="cmpLWeapon"></select></div></div>
+            <div class="field"><label>分类</label><div class="select-wrap">
+              <button type="button" class="dselect" data-for="cmpLCat" aria-haspopup="listbox" aria-expanded="false"><span class="dselect-label"></span></button>
+              <div class="dmenu" data-menu-for="cmpLCat" role="listbox" hidden></div>
+              <select id="cmpLCat" hidden></select>
+            </div></div>
+            <div class="field"><label>武器</label><div class="select-wrap">
+              <button type="button" class="dselect" data-for="cmpLWeapon" aria-haspopup="listbox" aria-expanded="false"><span class="dselect-label"></span></button>
+              <div class="dmenu" data-menu-for="cmpLWeapon" role="listbox" hidden></div>
+              <select id="cmpLWeapon" hidden></select>
+            </div></div>
             <div class="field"><label class="chk-row"><input type="checkbox" id="cmpLCharged"><span>满蓄力</span></label></div>
             <div class="field"><label>伤害</label><input type="number" id="cmpLAlpha" step="0.1"></div>
             <div class="field"><label>射速</label><input type="number" id="cmpLRpm" step="1"></div>
@@ -91,8 +113,16 @@
           </div>
           <div class="card">
             <div class="card-title">右侧</div>
-            <div class="field"><label>分类</label><div class="select-wrap"><select id="cmpRCat"></select></div></div>
-            <div class="field"><label>武器</label><div class="select-wrap"><select id="cmpRWeapon"></select></div></div>
+            <div class="field"><label>分类</label><div class="select-wrap">
+              <button type="button" class="dselect" data-for="cmpRCat" aria-haspopup="listbox" aria-expanded="false"><span class="dselect-label"></span></button>
+              <div class="dmenu" data-menu-for="cmpRCat" role="listbox" hidden></div>
+              <select id="cmpRCat" hidden></select>
+            </div></div>
+            <div class="field"><label>武器</label><div class="select-wrap">
+              <button type="button" class="dselect" data-for="cmpRWeapon" aria-haspopup="listbox" aria-expanded="false"><span class="dselect-label"></span></button>
+              <div class="dmenu" data-menu-for="cmpRWeapon" role="listbox" hidden></div>
+              <select id="cmpRWeapon" hidden></select>
+            </div></div>
             <div class="field"><label class="chk-row"><input type="checkbox" id="cmpRCharged"><span>满蓄力</span></label></div>
             <div class="field"><label>伤害</label><input type="number" id="cmpRAlpha" step="0.1"></div>
             <div class="field"><label>射速</label><input type="number" id="cmpRRpm" step="1"></div>
@@ -106,9 +136,21 @@
     <section class="panel" id="panelRight">
       <div class="card">
         <div class="card-title">目标 / 命中 / 增益</div>
-        <div class="field"><label>目标类型</label><div class="select-wrap"><select id="targetSelect"></select></div></div>
-        <div class="field"><label>护甲类型</label><div class="select-wrap"><select id="armorSelect"></select></div></div>
-        <div class="field"><label>命中部位</label><div class="select-wrap"><select id="partSelect"></select></div></div>
+        <div class="field"><label>目标类型</label><div class="select-wrap">
+          <button type="button" class="dselect" data-for="targetSelect" aria-haspopup="listbox" aria-expanded="false"><span class="dselect-label"></span></button>
+          <div class="dmenu" data-menu-for="targetSelect" role="listbox" hidden></div>
+          <select id="targetSelect" hidden></select>
+        </div></div>
+        <div class="field"><label>护甲类型</label><div class="select-wrap">
+          <button type="button" class="dselect" data-for="armorSelect" aria-haspopup="listbox" aria-expanded="false"><span class="dselect-label"></span></button>
+          <div class="dmenu" data-menu-for="armorSelect" role="listbox" hidden></div>
+          <select id="armorSelect" hidden></select>
+        </div></div>
+        <div class="field"><label>命中部位</label><div class="select-wrap">
+          <button type="button" class="dselect" data-for="partSelect" aria-haspopup="listbox" aria-expanded="false"><span class="dselect-label"></span></button>
+          <div class="dmenu" data-menu-for="partSelect" role="listbox" hidden></div>
+          <select id="partSelect" hidden></select>
+        </div></div>
         <div class="field">
           <label>伤害增益</label>
           <div class="boost-row">
@@ -133,10 +175,10 @@
         <div class="card-title">目标部位减伤预览</div>
         <div class="body-preview-row">
           <svg id="bodyPreview" viewBox="0 0 300 240" class="body-svg">
-            <rect id="bpHead" x="100" y="10" width="60" height="40" rx="10" class="body-part" data-part="head"/>
+            <rect id="bpHead" x="110" y="10" width="40" height="40" rx="10" class="body-part" data-part="head"/>
             <rect id="bpTorso" x="110" y="60" width="40" height="60" rx="8" class="body-part" data-part="torso"/>
-            <rect id="bpArmsL" x="92" y="62" width="16" height="56" rx="8" class="body-part" data-part="arms"/>
-            <rect id="bpArmsR" x="152" y="62" width="16" height="56" rx="8" class="body-part" data-part="arms"/>
+            <rect id="bpArmsL" x="88" y="62" width="16" height="56" rx="8" class="body-part" data-part="arms"/>
+            <rect id="bpArmsR" x="156" y="62" width="16" height="56" rx="8" class="body-part" data-part="arms"/>
             <rect id="bpLegsL" x="104" y="126" width="20" height="70" rx="8" class="body-part" data-part="legs"/>
             <rect id="bpLegsR" x="136" y="126" width="20" height="70" rx="8" class="body-part" data-part="legs"/>
           </svg>

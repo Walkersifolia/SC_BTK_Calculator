@@ -64,6 +64,7 @@ async function loadMeta() {
   $("catSelect").value = state.categories[0];
   $("cmpLCat").value = state.categories[0];
   $("cmpRCat").value = state.categories[0];
+  syncDSelects();
   onCatChange();
   onCatChange("cmpL");
   onCatChange("cmpR");
@@ -79,6 +80,70 @@ function fillSelect(sel, values) {
     o.textContent = v;
     sel.appendChild(o);
   }
+  syncDSelects();
+}
+
+/* ── 自绘下拉（WebView2 原生 select 弹层不随页面主题渲染，自绘替代）── */
+function buildCustomSelects() {
+  document.querySelectorAll(".dselect").forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", () => {
+      const menu = document.querySelector(`.dmenu[data-menu-for="${btn.dataset.for}"]`);
+      if (!menu) return;
+      if (menu.hidden) {
+        openMenu(btn);
+      } else {
+        closeMenus();
+      }
+    });
+    btn.addEventListener("keydown", e => {
+      if (e.key === "Escape" || e.key === "Tab") closeMenus();
+    });
+  });
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".select-wrap")) closeMenus();
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeMenus();
+  });
+}
+
+function syncDSelects() {
+  document.querySelectorAll(".dselect").forEach(btn => {
+    const sel = document.getElementById(btn.dataset.for);
+    const label = btn.querySelector(".dselect-label");
+    if (sel && label) label.textContent = sel.value || "";
+  });
+}
+
+function openMenu(btn) {
+  closeMenus();
+  const sel = document.getElementById(btn.dataset.for);
+  const menu = document.querySelector(`.dmenu[data-menu-for="${btn.dataset.for}"]`);
+  if (!sel || !menu) return;
+  syncDSelects();
+  menu.innerHTML = "";
+  for (const opt of sel.options) {
+    const it = document.createElement("button");
+    it.type = "button";
+    it.className = "dmenu-item" + (opt.value === sel.value ? " selected" : "");
+    it.textContent = opt.textContent;
+    it.addEventListener("click", () => {
+      sel.value = opt.value;
+      sel.dispatchEvent(new Event("change", { bubbles: true }));
+      closeMenus();
+      syncDSelects();
+    });
+    menu.appendChild(it);
+  }
+  menu.hidden = false;
+  btn.setAttribute("aria-expanded", "true");
+}
+
+function closeMenus() {
+  document.querySelectorAll(".dmenu").forEach(m => { m.hidden = true; });
+  document.querySelectorAll(".dselect").forEach(b => b.setAttribute("aria-expanded", "false"));
 }
 
 /* ── 分类/武器联动 ── */
@@ -104,6 +169,7 @@ function onCatChange(side) {
     wSel.value = weapons.length ? weapons[0].name : "";
   }
   if (side) { onWeaponChange(side); } else { onWeaponChange(); }
+  syncDSelects();
 }
 
 function onWeaponChange(side) {
@@ -417,6 +483,7 @@ function syncEditToCompare() {
 async function init() {
   applyTheme();
   bindEvents();
+  buildCustomSelects();
   try {
     await loadMeta();
   } catch (e) {

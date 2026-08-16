@@ -1,68 +1,264 @@
 /* ============================================================
-   BTK 计算器 — 简洁圆角风格（参考 VRCA.Toolbox.App 的 WebView2 风格）
-   浅色/深色双主题：通过 body[data-theme] 切换 CSS 变量
+   BTK 计算器 — 样式完全对齐官方 DeepSeek Harness (dsh web UI)
+   设计系统来源：deepseek-ai/deepseek-harness（MIT）
+     packages/client/ui-theme/src/styles/design-platform.css
+     packages/client/ui-theme/src/styles/base.css
+     packages/client/ui-theme/src/styles/scrollbar.css
+     packages/client/ui-primitives/src/{Button,Input,Pill,Menu,Modal}.module.css
+     packages/client/ui-sidebar/src/client/SidebarRoot.module.css
+     packages/client/ui-conversation/src/client/skeleton/{InputBar,ConversationRoot}.module.css
+   主题切换：body[data-theme="dark"]（对应官方 body[data-ds-dark-theme]）
+   布局（每个区域的内容与位置）保持不变，仅替换视觉样式。
    ============================================================ */
 
+/* ── 设计 token（官方 --dsw-* 语义别名，仅收录本应用使用的子集）── */
 :root {
-  /* 浅色主题 */
-  --bg: #f0f0f5;
-  --surface: #ffffff;
-  --surface-alt: #f7f7fa;
-  --text: #1a1a2e;
-  --text-secondary: #5a6478;
-  --accent: #d97706;
-  --accent-hover: #f59e0b;
-  --accent-text: #ffffff;
-  --border: rgba(26, 26, 46, 0.12);
-  --divider: rgba(90, 100, 120, 0.18);
-  --danger: #dc2626;
-  --success: #16a34a;
-  --input-bg: #ffffff;
-  --hover-row: rgba(217, 119, 6, 0.08);
-  --shadow: 0 2px 12px rgba(26, 26, 46, 0.06);
-  --shadow-hover: 0 4px 20px rgba(26, 26, 46, 0.1);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --body-hit: #fca5a5;
-  --body-normal: #fde68a;
-  --body-outline: #475569;
-  --body-dim: #334155;
-  --res-bg: #f8fafc;
+  /* 静态色板（浅色） */
+  --dsw-neutral-00: #ffffff;
+  --dsw-neutral-100: #f5f5f5;
+  --dsw-neutral-150: #ededed;
+  --dsw-neutral-200: #e5e5e5;
+  --dsw-neutral-300: #d4d4d4;
+  --dsw-neutral-500: #7f8287;
+  --dsw-neutral-600: #545557;
+  --dsw-neutral-700: #3c3c3d;
+  --dsw-neutral-900: #0f0f0f;
+  --dsw-bluish-50: #f9fafb;
+  --dsw-bluish-60: #f5f6f7;
+  --dsw-bluish-75: #f1f3f5;
+  --dsw-bluish-100: #ebeef2;
+  --dsw-bluish-150: #e9ecf2;
+  --dsw-bluish-200: #e1e5ee;
+  --dsw-bluish-300: #cfd3d6;
+  --dsw-bluish-400: #adb2b8;
+  --dsw-bluish-500: #979da6;
+  --dsw-bluish-600: #81858c;
+  --dsw-bluish-700: #61666b;
+  --dsw-bluish-750: #43454a;
+  --dsw-bluish-800: #353536;
+  --dsw-bluish-850: #2c2c2e;
+  --dsw-bluish-875: #232324;
+  --dsw-bluish-900: #1b1b1c;
+  --dsw-bluish-950: #151517;
+  --dsw-bluish-1000: #0f1115;
+  --dsw-deepseek-400: #679efe;
+  --dsw-deepseek-450: #5686fe;
+  --dsw-deepseek-500: #4176e6;
+  --dsw-red-400: #f25a5a;
+  --dsw-red-500: #ef4444;
+  --dsw-red-600: #ec1313;
+  --dsw-red-100: #fee2e2;
+  --dsw-green-400: #4ed17e;
+  --dsw-green-500: #22c55e;
+  --dsw-green-100: #e6faed;
+  --dsw-amber-400: #f7ad31;
+  --dsw-amber-500: #f59e0b;
+  --dsw-amber-600: #dd8629;
+  --dsw-amber-100: #fef5e7;
+
+  /* 语义别名（浅色，对齐官方 body 段） */
+  --bg-base: #ffffff;
+  --bg-layer-1: #ffffff;
+  --bg-layer-2: #ffffff;
+  --bg-module-platform: var(--dsw-bluish-60);
+  --bg-overlay: var(--dsw-bluish-150);
+  --bg-mask-1: rgba(0, 0, 0, 0.24);
+  --border-l1: rgba(0, 0, 0, 0.04);
+  --border-l2: rgba(0, 0, 0, 0.1);
+  --border-l2-thin: rgba(0, 0, 0, 0.1);
+  --border-l3: rgba(0, 0, 0, 0.12);
+  --border-l4: rgba(0, 0, 0, 0.16);
+  --brand-primary: var(--dsw-bluish-1000);
+  --brand-text: var(--dsw-bluish-1000);
+  --label-primary: var(--dsw-bluish-1000);
+  --label-secondary: var(--dsw-bluish-700);
+  --label-tertiary: var(--dsw-bluish-600);
+  --label-caption: var(--dsw-bluish-400);
+  --label-dimmed: var(--dsw-bluish-200);
+  --label-primary-foreground: #ffffff;
+  --button-primary-fill: var(--brand-primary);
+  --button-primary-hover: var(--dsw-bluish-750);
+  --button-ghost-active-fill: var(--dsw-bluish-100);
+  --button-ghost-active-border: var(--dsw-bluish-500);
+  --button-info-fill: var(--dsw-deepseek-500);
+  --button-info-hover: var(--dsw-deepseek-400);
+  --button-floating-fill: #ffffff;
+  --button-floating-hover: var(--dsw-bluish-75);
+  --button-elevated-fill: #ffffff;
+  --interactive-bg-hover: rgba(38, 49, 72, 0.06);
+  --interactive-bg-hover-solid: var(--dsw-bluish-75);
+  --interactive-bg-active: rgba(38, 49, 72, 0.1);
+  --interactive-bg-hover-danger: rgba(236, 19, 19, 0.05);
+  --interactive-bg-hover-accent: rgba(38, 49, 72, 0.14);
+  --state-error-primary: var(--dsw-red-600);
+  --state-error-secondary: var(--dsw-red-400);
+  --state-success-primary: var(--dsw-green-500);
+  --state-success-secondary: var(--dsw-green-400);
+  --state-warn-primary: var(--dsw-amber-500);
+  --state-warn-label: var(--dsw-amber-600);
+  --state-business-primary: var(--dsw-deepseek-500);
+  --state-business-tertiary: var(--dsw-deepseek-100, #e4edfd);
+  --specific-sidebar-fill: var(--dsw-bluish-50);
+  --specific-input-major: #ffffff;
+  --specific-selector: var(--dsw-bluish-60);
+  --specific-menu: #ffffff;
+  --scrollbar-bg-l1: var(--dsw-neutral-200);
+  --scrollbar-hover-l1: var(--dsw-neutral-300);
+  --scrollbar-bg-l2: var(--dsw-neutral-200);
+  --scrollbar-hover-l2: var(--dsw-neutral-300);
+  --markdown-code-block: var(--dsw-bluish-50);
+
+  /* 阴影（官方值） */
+  --shadow-lv1: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lv2: 0 4px 12px 0 rgba(0, 0, 0, 0.02), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  --shadow-lv3: 0 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 4px 0 rgba(0, 0, 0, 0.02), 0 12px 32px 0 rgba(0, 0, 0, 0.08);
+
+  /* 动效（官方） */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-duration: 0.2s;
+  --transition-duration-fast: 0.1s;
+  --transition-duration-slow: 0.3s;
+
+  /* 组件级映射（旧变量名保留，值改为官方语义） */
+  --bg: var(--bg-base);
+  --surface: var(--bg-layer-1);
+  --surface-alt: var(--bg-module-platform);
+  --text: var(--label-primary);
+  --text-secondary: var(--label-secondary);
+  --text-tertiary: var(--label-tertiary);
+  --accent: var(--brand-primary);
+  --accent-hover: var(--button-primary-hover);
+  --accent-text: var(--label-primary-foreground);
+  --accent-blue: var(--state-business-primary);
+  --border: var(--border-l2);
+  --divider: var(--border-l1);
+  --danger: var(--state-error-primary);
+  --danger-soft: var(--state-error-secondary);
+  --success: var(--state-success-primary);
+  --warn: var(--state-warn-primary);
+  --warn-label: var(--state-warn-label);
+  --input-bg: var(--bg-layer-1);
+  --hover-row: var(--interactive-bg-hover);
+  --hover-solid: var(--interactive-bg-hover-solid);
+  --active-bg: var(--interactive-bg-active);
+  --sidebar-fill: var(--specific-sidebar-fill);
+  --res-bg: var(--markdown-code-block);
+  --body-hit: var(--danger-soft);
+  --body-normal: var(--dsw-bluish-100);
+  --body-outline: var(--dsw-bluish-400);
+  --body-dim: var(--label-tertiary);
+  --thumb: var(--scrollbar-bg-l1);
+  --thumb-hover: var(--scrollbar-hover-l1);
+  --menu-bg: #ffffff;
+  --ghost-active-fill: var(--button-ghost-active-fill);
+  --ghost-active-border: var(--button-ghost-active-border);
 }
 
 body[data-theme="dark"] {
-  --bg: #1a1a2e;
-  --surface: #16213e;
-  --surface-alt: #1f2a44;
-  --text: #f2f2f7;
-  --text-secondary: #9aa3b5;
-  --accent: #f59e0b;
-  --accent-hover: #fbbf24;
-  --accent-text: #1a1a2e;
-  --border: rgba(255, 255, 255, 0.1);
-  --divider: rgba(255, 255, 255, 0.08);
-  --danger: #f87171;
-  --success: #4ade80;
-  --input-bg: #1f2a44;
-  --hover-row: rgba(245, 158, 11, 0.12);
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --body-hit: #f87171;
-  --body-normal: #b45309;
-  --body-outline: #4a5261;
-  --body-dim: #c3c9d4;
-  --res-bg: #1a1d24;
+  /* 静态色板（深色，官方仅个别中性色不同，其余与浅色共用） */
+  --dsw-bluish-60: #f9fafb;
+  --dsw-bluish-400: #adb2b8;
+
+  /* 语义别名（深色，对齐官方 body[data-ds-dark-theme] 段） */
+  --bg-base: var(--dsw-bluish-950);
+  --bg-layer-1: var(--dsw-bluish-875);
+  --bg-layer-2: var(--dsw-bluish-850);
+  --bg-module-platform: var(--dsw-bluish-800);
+  --bg-overlay: var(--dsw-bluish-700);
+  --bg-mask-1: rgba(0, 0, 0, 0.5);
+  --border-l1: rgba(255, 255, 255, 0.06);
+  --border-l2: rgba(255, 255, 255, 0.12);
+  --border-l2-thin: rgba(255, 255, 255, 0.06);
+  --border-l3: rgba(255, 255, 255, 0.16);
+  --border-l4: rgba(255, 255, 255, 0.2);
+  --brand-primary: var(--dsw-bluish-50);
+  --brand-text: var(--dsw-bluish-50);
+  --label-primary: var(--dsw-bluish-50);
+  --label-secondary: var(--dsw-bluish-300);
+  --label-tertiary: var(--dsw-bluish-400);
+  --label-caption: var(--dsw-bluish-600);
+  --label-dimmed: var(--dsw-bluish-750);
+  --label-primary-foreground: var(--dsw-bluish-1000);
+  --button-primary-fill: var(--brand-primary);
+  --button-primary-hover: var(--dsw-bluish-100);
+  --button-ghost-active-fill: var(--dsw-bluish-750);
+  --button-ghost-active-border: var(--dsw-bluish-600);
+  --button-info-fill: var(--dsw-deepseek-400);
+  --button-info-hover: var(--dsw-deepseek-500);
+  --button-floating-fill: var(--dsw-bluish-850);
+  --button-floating-hover: var(--dsw-bluish-800);
+  --button-elevated-fill: var(--dsw-bluish-750);
+  --interactive-bg-hover: rgba(255, 255, 255, 0.08);
+  --interactive-bg-hover-solid: var(--dsw-bluish-800);
+  --interactive-bg-active: rgba(255, 255, 255, 0.14);
+  --interactive-bg-hover-danger: rgba(242, 90, 90, 0.15);
+  --interactive-bg-hover-accent: rgba(255, 255, 255, 0.24);
+  --state-error-primary: var(--dsw-red-400);
+  --state-error-secondary: var(--dsw-red-400);
+  --state-success-primary: var(--dsw-green-500);
+  --state-success-secondary: var(--dsw-green-400);
+  --state-warn-primary: var(--dsw-amber-500);
+  --state-warn-label: var(--dsw-amber-600);
+  --state-business-primary: var(--dsw-deepseek-400);
+  --state-business-tertiary: var(--dsw-deepseek-800, #34415b);
+  --specific-sidebar-fill: var(--dsw-bluish-900);
+  --specific-input-major: var(--dsw-bluish-850);
+  --specific-selector: var(--dsw-bluish-800);
+  --specific-menu: var(--dsw-bluish-800);
+  --scrollbar-bg-l1: var(--dsw-neutral-700);
+  --scrollbar-hover-l1: var(--dsw-neutral-600);
+  --scrollbar-bg-l2: var(--dsw-neutral-600);
+  --scrollbar-hover-l2: var(--dsw-neutral-500);
+  --markdown-code-block: var(--dsw-bluish-900);
+
+  /* 组件级映射 */
+  --bg: var(--bg-base);
+  --surface: var(--bg-layer-1);
+  --surface-alt: var(--bg-module-platform);
+  --text: var(--label-primary);
+  --text-secondary: var(--label-secondary);
+  --text-tertiary: var(--label-tertiary);
+  --accent: var(--brand-primary);
+  --accent-hover: var(--button-primary-hover);
+  --accent-text: var(--label-primary-foreground);
+  --accent-blue: var(--state-business-primary);
+  --border: var(--border-l2);
+  --divider: var(--border-l1);
+  --danger: var(--state-error-primary);
+  --danger-soft: var(--state-error-secondary);
+  --success: var(--state-success-primary);
+  --warn: var(--state-warn-primary);
+  --warn-label: var(--state-warn-label);
+  --input-bg: var(--bg-layer-1);
+  --hover-row: var(--interactive-bg-hover);
+  --hover-solid: var(--interactive-bg-hover-solid);
+  --active-bg: var(--interactive-bg-active);
+  --sidebar-fill: var(--specific-sidebar-fill);
+  --res-bg: var(--markdown-code-block);
+  --body-hit: var(--danger-soft);
+  --body-normal: var(--dsw-bluish-850);
+  --body-outline: var(--dsw-bluish-600);
+  --body-dim: var(--label-tertiary);
+  --thumb: var(--scrollbar-bg-l1);
+  --thumb-hover: var(--scrollbar-hover-l1);
+  --menu-bg: var(--dsw-bluish-800);
+  --ghost-active-fill: var(--button-ghost-active-fill);
+  --ghost-active-border: var(--button-ghost-active-border);
+  /* 原生控件（number spinner / select 弹层 / 滚动条）随主题渲染：
+     单一值而非 light dark，避免 Chromium 自行选择导致浅色下深色箭头 */
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   height: 100%;
-  font-family: "Microsoft YaHei UI", "Segoe UI", system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 13px;
   background: var(--bg);
   color: var(--text);
-  transition: background 0.2s ease, color 0.2s ease;
+  color-scheme: light;
   overflow: hidden;
 }
 
@@ -72,13 +268,13 @@ html, body {
   height: 100vh;
 }
 
-/* ── 顶栏 ── */
+/* ── 顶栏（官方 sidebar/header 风格：浅灰底 + 底部细线）── */
 .topbar {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 10px 20px;
-  background: var(--surface);
+  background: var(--sidebar-fill);
   border-bottom: 1px solid var(--divider);
 }
 
@@ -101,45 +297,72 @@ html, body {
   color: var(--text);
 }
 
+/* ── 模式切换（官方 tab：13px medium，选中变品牌蓝 + 2px 底条）── */
 .modes {
   display: flex;
-  gap: 4px;
+  gap: 36px;
   margin-left: 8px;
 }
 
 .mode-btn {
+  position: relative;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
+  padding: 4px 0 8px;
   font-size: 13px;
-  padding: 6px 14px;
-  border-radius: var(--radius-sm);
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--text-tertiary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: color var(--transition-duration) var(--ease-in-out);
 }
 
-.mode-btn:hover { background: var(--hover-row); color: var(--text); }
-.mode-btn.active { background: var(--accent); color: var(--accent-text); font-weight: 600; }
+.mode-btn:hover { color: var(--text); }
 
+.mode-btn::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: transparent;
+  transition: background-color var(--transition-duration) var(--ease-in-out);
+}
+
+.mode-btn.active {
+  color: var(--accent-blue);
+}
+
+.mode-btn.active::after {
+  background: var(--accent-blue);
+}
+
+/* ── 主题切换按钮（官方 iconButton：28px 正圆、无边框、hover 灰底）── */
 .icon-btn {
   margin-left: auto;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-alt);
-  color: var(--text);
-  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 15px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: background-color var(--transition-duration) var(--ease-in-out),
+    color var(--transition-duration) var(--ease-in-out);
 }
 
-.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+.icon-btn:hover {
+  background: var(--hover-row);
+  color: var(--text);
+}
 
-/* ── 主区 ── */
+/* ── 主区（左栏 = 官方侧栏底色，右栏 = 官方主区底色）── */
 .content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -157,14 +380,22 @@ html, body {
   min-height: 0;
 }
 
-/* ── 圆角卡片 ── */
+#panelLeft {
+  background: var(--sidebar-fill);
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-l1);
+}
+
+/* ── 卡片（官方 elevated 面板：r12 + l2 细边框 + 轻阴影）── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 12px;
   padding: 14px 16px;
-  box-shadow: var(--shadow);
-  transition: box-shadow 0.15s ease, background 0.2s ease;
+  box-shadow: var(--shadow-lv1);
+  transition: box-shadow var(--transition-duration) var(--ease-in-out),
+    background var(--transition-duration) var(--ease-in-out);
 }
 
 .card-title {
@@ -180,7 +411,7 @@ html, body {
 .card-title .hint {
   font-size: 11px;
   font-weight: 400;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
 }
 
 /* ── 表单字段 ── */
@@ -200,60 +431,116 @@ html, body {
   font-size: 12px;
 }
 
+/* 数字输入框（官方 Input：h32、r8、l2 边框、focus 边框变品牌色） */
 .field input[type="number"] {
   flex: 1;
   min-width: 0;
   height: 32px;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   background: var(--input-bg);
   color: var(--text);
   font-size: 13px;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--transition-duration) var(--ease-in-out);
 }
 
 .field input[type="number"]:focus { border-color: var(--accent); }
 
-/* ── 自定义下拉菜单（关键：与参考项目一致）── */
+.field input[type="number"]::placeholder { color: var(--label-dimmed); }
+
+/* ── 自绘下拉菜单（原生 select 弹层在 WebView2 中不随页面主题渲染，
+     改用自定义菜单，视觉对齐官方 Menu 卡片：r12 + shadow-lv3 + item r10）── */
 .select-wrap { flex: 1; position: relative; }
 
-.select-wrap select {
-  appearance: none;
-  -webkit-appearance: none;
+.dselect {
+  display: block;
   width: 100%;
-  height: 32px;
-  padding: 0 30px 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--input-bg);
-  color: var(--text);
+  height: 28px;
+  padding: 0 20px 0 8px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2381858C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 12px 12px;
+  color: var(--text-secondary);
   font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+  font-family: inherit;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: background-color var(--transition-duration) var(--ease-in-out);
 }
 
-.select-wrap select:hover { border-color: var(--accent); }
-.select-wrap select:focus { border-color: var(--accent); }
+.dselect:hover,
+.dselect:focus-visible,
+.dselect[aria-expanded="true"] {
+  background-color: var(--hover-row);
+}
 
-.select-wrap::after {
-  content: "";
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  border-right: 1.5px solid var(--text-secondary);
-  border-bottom: 1.5px solid var(--text-secondary);
-  transform: translateY(-70%) rotate(45deg);
+.dselect-label {
   pointer-events: none;
-  transition: transform 0.15s ease;
 }
 
-/* 下拉展开的选项列表 — 由原生渲染，但通过 select 的 color-scheme 保证深色正确 */
-.select-wrap select { color-scheme: light dark; }
+.dmenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  min-width: 100%;
+  max-width: 300px;
+  max-height: 264px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border-l1);
+  border-radius: 12px;
+  background: var(--menu-bg);
+  box-shadow: var(--shadow-lv3);
+}
+
+.dmenu-item {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 20px;
+  font-family: inherit;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color var(--transition-duration) var(--ease-in-out);
+}
+
+.dmenu-item:hover,
+.dmenu-item:focus-visible {
+  background: var(--hover-row);
+  outline: none;
+}
+
+.dmenu-item.selected {
+  background: var(--ghost-active-fill);
+  box-shadow: inset 0 0 0 1px var(--ghost-active-border);
+  font-weight: 600;
+}
+
+.dmenu-item + .dmenu-item {
+  margin-top: 1px;
+}
 
 /* 复选框 */
 .chk-row {
@@ -289,24 +576,26 @@ html, body {
   width: 44px;
   text-align: right;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--text);
 }
 
 /* ── 徽标 / 警告 / 信息 ── */
 .badge {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--warn-label);
   margin-top: 4px;
 }
 
+/* 警告（官方 noticeError：danger 淡红底 + 错误色文字） */
 .warn {
   color: var(--danger);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
   padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border-radius: 8px;
+  background: var(--interactive-bg-hover-danger);
 }
 
 .info-text {
@@ -335,8 +624,8 @@ html, body {
   height: auto;
   flex-shrink: 0;
   background: var(--res-bg);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border-radius: 8px;
+  border: 1px solid var(--border-l1);
 }
 
 .body-part {
@@ -344,11 +633,12 @@ html, body {
   stroke: var(--body-outline);
   stroke-width: 1.5;
   cursor: pointer;
-  transition: fill 0.15s ease;
+  transition: fill var(--transition-duration) var(--ease-in-out),
+    stroke var(--transition-duration) var(--ease-in-out);
 }
 
 .body-part.active { fill: var(--body-hit); }
-.body-part:hover { filter: brightness(0.92); }
+.body-part:hover { fill: var(--danger-soft); opacity: 0.85; }
 
 .part-stats {
   flex: 1;
@@ -381,19 +671,20 @@ html, body {
 
 .part-stats .stat.hl { background: var(--hover-row); color: var(--text); }
 .part-stats .stat b { color: var(--text); font-weight: 600; }
-.part-stats .stat .dmg { color: var(--accent); }
+.part-stats .stat .dmg { color: var(--text); }
 
-/* ── 结果区 ── */
+/* ── 结果区（官方代码块表面：浅灰底 + 细边框 + 等宽字体）── */
 .result-card { flex: 1; display: flex; flex-direction: column; }
 
 .result-text {
   flex: 1;
   overflow-y: auto;
   background: var(--res-bg);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border-radius: 8px;
+  border: 1px solid var(--border-l1);
   padding: 12px 14px;
-  font-family: "Consolas", "Courier New", monospace;
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", Consolas,
+    "Liberation Mono", Menlo, Courier, "PingFang SC", "Microsoft YaHei";
   font-size: 13px;
   line-height: 1.8;
   color: var(--text);
@@ -401,23 +692,58 @@ html, body {
 }
 
 .result-text .big {
-  font-family: "Microsoft YaHei UI", sans-serif;
+  font-family: inherit;
   font-size: 20px;
   font-weight: 700;
-  color: var(--danger);
+  color: var(--text);
 }
 
 .result-text .title {
-  font-family: "Microsoft YaHei UI", sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--text);
 }
 
 .result-text .muted { color: var(--text-secondary); font-size: 12px; }
 
-/* ── 滚动条 ── */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
-::-webkit-scrollbar-track { background: transparent; }
+/* ── 滚动条（官方 scrollbar.css 全套）── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: var(--thumb);
+  transition: background-color var(--transition-duration) var(--ease-in-out);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* 无 -webkit 引擎（Firefox）：标准属性路径 */
+@supports not selector(::-webkit-scrollbar) {
+  html, body, .panel, .result-text {
+    scrollbar-width: thin;
+    scrollbar-color: var(--thumb) transparent;
+  }
+}
+
+/* ── 减弱动态效果：官方同款处理 ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
